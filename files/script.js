@@ -8,5 +8,8 @@ function hello() {
 hello();
 
 function scrape() {
+	define(['require', 'cheerio'], function (require) {
+    	var namedModule = require('cheerio');
+	});
 }
 
