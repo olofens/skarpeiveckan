@@ -8,5 +8,8 @@ function hello() {
 hello();
 
 function scrape() {
+	const cheerio = require("cheerio");
+	const $ = cheerio.load("https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7931&k=LS7931&p=1");
+	console.log($);
 }
 
