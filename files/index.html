@@ -19,13 +19,11 @@
 
 
 		</ul>
-		<script data-main="js/script" src="require.js"></script>
+		<script data-main="js/config" src="require.js"></script>
 		<script> 
-			require(["config", "/../node_modules/cheerio/lib/parse"], function() {
-				alert();
-				require(["config", "cheerio"], function() {
-				
-				});
+			require(["config"], function() {
+				require(["cheerio"]);
+
 			});
 		</script>
 		

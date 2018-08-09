@@ -6,10 +6,3 @@ function hello() {
 	list.insertBefore(newElem, document.getElementById("mall"));
 }
 hello();
-
-function scrape() {
-	define(['require', 'cheerio'], function (require) {
-    	var namedModule = require('cheerio');
-	});
-}
-
