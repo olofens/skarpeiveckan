@@ -21,8 +21,11 @@
 		</ul>
 		<script data-main="js/script" src="require.js"></script>
 		<script> 
-			require(["config"], function() {
-				scrape();
+			require(["config", "/../node_modules/cheerio/lib/parse"], function() {
+				alert();
+				require(["config", "cheerio"], function() {
+				
+				});
 			});
 		</script>
 		
