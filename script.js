@@ -29,7 +29,7 @@ function hello(matches) {
 }
 
 function req() {
-	let cheerio = require("cheerio");
-	let $ = cheerio.load("http://www.svenskbandy.se/seriercuper/DIVISION123/DIV2HERRAR/sydvast/");}
+	var cheerio = require("cheerio");
+	var $ = cheerio.load("http://www.svenskbandy.se/seriercuper/DIVISION123/DIV2HERRAR/sydvast/");}
 req();
 
