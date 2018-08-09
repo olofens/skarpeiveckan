@@ -1,0 +1,26 @@
+var http = require('http');
+
+http.createServer(function (req, res) {
+    res.writeHead(200, {'Content-Type': 'text/html'});
+    res.end('Hello World!');
+}).listen(8080);
+
+function hello(matches) {
+	
+	var i;
+	for (i = 0; i < matches; i++) {
+		var newElem = document.getElementById("mall").cloneNode(true);
+		document.getElementById("mall").style.visibility = "hidden";
+		newElem.id = "mall" + i;
+		var list = document.getElementById("lista");
+		list.insertBefore(newElem, document.getElementById("mall"));
+		newElem.style.visibility = "";
+
+	}
+}
+
+function req() {
+	let cheerio = require("cheerio");
+	let $ = cheerio.load("http://www.svenskbandy.se/seriercuper/DIVISION123/DIV2HERRAR/sydvast/");}
+req();
+

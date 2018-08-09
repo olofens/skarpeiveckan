@@ -4,7 +4,8 @@
   "description": "skarpeiveckan npm package",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon script.js"
   },
   "repository": {
     "type": "git",
@@ -20,5 +21,10 @@
   "bugs": {
     "url": "https://github.com/olofens/skarpeiveckan/issues"
   },
-  "homepage": "https://github.com/olofens/skarpeiveckan#readme"
+  "homepage": "https://github.com/olofens/skarpeiveckan#readme",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
+    "node": "^10.8.0",
+    "nodemon": "^1.18.3"
+  }
 }
