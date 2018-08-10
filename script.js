@@ -1,5 +1,7 @@
 var http = require('http');
 var fs = require('fs');
+var cheerio = require("cheerio");
+var request = require("request");
 
 http.createServer(function (req, res) {
     res.writeHead(200, {'Content-Type': 'text/html'});
@@ -28,8 +30,12 @@ function hello(matches) {
 	}
 }
 
-function req() {
-	var cheerio = require("cheerio");
-	var $ = cheerio.load("http://www.svenskbandy.se/seriercuper/DIVISION123/DIV2HERRAR/sydvast/");}
-req();
+var url = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7931&k=LS7931&p=1";
+request(url, function(err, resp, html) {
+	if (!err && resp.statusCode == 200) {
+		var $ = cheerio.load(html);
+		var table = $("#tabell_std");
+		console.log(table.html());
+	}
+})
 
