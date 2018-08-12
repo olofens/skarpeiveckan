@@ -35,15 +35,32 @@ var url = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7931&k=LS
 request(url, function(err, resp, html) {
 	if (!err && resp.statusCode == 200) {
 		var $ = cheerio.load(html);
-		var table = $("#tabell_std");
+		//var table = $("#tabell_std");
 
-		cheerioTableparser($);
-		var data = $("#tabell_std").parsetable(true,true,true);
-		console.log(data);
+		var doTable = false;
+		if(doTable) {
+            cheerioTableparser($);
+            var data = $("#tabell_std").parsetable(true,true,true);
+            console.log(data);
 
-		for (var i = 0; i < data[0].length; i++) {
-			console.log(data[0][i]);
+            for (var i = 0; i < data[0].length; i++) {
+                console.log(data[0][i]);
+            }
 		}
+
+		var rows = [];
+
+		var oddRows = $(".odd");
+		console.log(oddRows.length);
+		oddRows.contents();
+
+		$(".odd").each(function(i, elem) {
+			rows[i] = $(this).text();
+		});
+
+		rows.join(", ");
+		console.log(rows);
+
 
 	}
 })
