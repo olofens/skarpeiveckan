@@ -2,6 +2,7 @@ var http = require('http');
 var fs = require('fs');
 var cheerio = require("cheerio");
 var request = require("request");
+var cheerioTableparser = require("cheerio-tableparser");
 
 http.createServer(function (req, res) {
     res.writeHead(200, {'Content-Type': 'text/html'});
@@ -35,7 +36,15 @@ request(url, function(err, resp, html) {
 	if (!err && resp.statusCode == 200) {
 		var $ = cheerio.load(html);
 		var table = $("#tabell_std");
-		console.log(table.html());
+
+		cheerioTableparser($);
+		var data = $("#tabell_std").parsetable(true,true,true);
+		console.log(data);
+
+		for (var i = 0; i < data[0].length; i++) {
+			console.log(data[0][i]);
+		}
+
 	}
 })
 

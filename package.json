@@ -24,6 +24,7 @@
   "homepage": "https://github.com/olofens/skarpeiveckan#readme",
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
+    "cheerio-tableparser": "^1.0.1",
     "node": "^10.8.0",
     "nodemon": "^1.18.3",
     "request": "^2.88.0"
