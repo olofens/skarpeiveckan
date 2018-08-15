@@ -4,6 +4,7 @@ var cheerio = require("cheerio");
 var request = require("request");
 var cheerioTableparser = require("cheerio-tableparser");
 
+
 http.createServer(function (req, res) {
     res.writeHead(200, {'Content-Type': 'text/html'});
     fs.readFile("./index.html", null, function(error, data) {
@@ -48,18 +49,65 @@ request(url, function(err, resp, html) {
             }
 		}
 
-		var rows = [];
-
-		var oddRows = $(".odd");
-		console.log(oddRows.length);
-		oddRows.contents();
+		var oddRows = [];
+        var evenRows = [];
 
 		$(".odd").each(function(i, elem) {
-			rows[i] = $(this).text();
+			oddRows[i] = $(this).text();
 		});
 
-		rows.join(", ");
-		console.log(rows);
+        $(".even").each(function(i, elem) {
+            evenRows[i] = $(this).text();
+        });
+
+		oddRows.join(", ");
+		console.log("ODD " + oddRows.length);
+		console.log(oddRows);
+
+        evenRows.join(", ");
+        console.log("EVEN " + evenRows.length);
+        console.log(evenRows);
+
+        var allRows = [];
+
+        for (var i = 0; i < oddRows.length; i++) {
+        	allRows[2*i-1] = oddRows[i];
+        	allRows[2*i] = evenRows[i];
+		}
+
+		for (var i = 0; i < allRows.length; i++) {
+			console.log(allRows[i]);
+		}
+
+		string = allRows[0];
+		console.log("string: " + string);
+		string = string.replace("\n", "");
+        console.log("string: " + string);
+        string = string.replace("\n", "");
+        console.log("string: " + string);
+        string = string.replace("\n", "");
+        console.log("string: " + string);
+
+        var colonIndex = string.indexOf(":");
+        console.log(colonIndex);
+
+        var string2 = string.slice(0,colonIndex-2);
+        console.log(string2);
+
+        var string3 = string.slice(colonIndex-2, colonIndex+3);
+        console.log(string3);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 	}
