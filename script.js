@@ -89,13 +89,62 @@ request(url, function(err, resp, html) {
         console.log("string: " + string);
 
         var colonIndex = string.indexOf(":");
-        console.log(colonIndex);
+        //console.log(colonIndex);
 
         var string2 = string.slice(0,colonIndex-2);
         console.log(string2);
 
         var string3 = string.slice(colonIndex-2, colonIndex+3);
         console.log(string3);
+
+        var nameDashIndex = string.indexOf("-");
+        var scoreDashIndex = string.lastIndexOf("-");
+
+        var string4 = string.slice(colonIndex+4, nameDashIndex-1);
+        console.log(string4);
+
+        /*console.log(string[scoreDashIndex]);
+        console.log(string[scoreDashIndex-1]);
+        console.log("-2: " + string[scoreDashIndex-2]);
+        console.log("-3: " + string[scoreDashIndex-3]);
+
+        console.log();
+
+        console.log(string[scoreDashIndex]);
+        console.log(string[scoreDashIndex+1]);
+        console.log("+2: " + string[scoreDashIndex+2]);
+        console.log("+3: " + string[scoreDashIndex+3]);*/
+
+        var indexBeforeScore;
+        var indexAfterScore;
+
+        if (string[scoreDashIndex-3] === "") {
+        	indexBeforeScore = scoreDashIndex - 3;
+		} else {
+        	indexBeforeScore = scoreDashIndex - 4;
+		}
+
+		if (string[scoreDashIndex + 3] === "") {
+			indexAfterScore = scoreDashIndex + 3;
+		} else {
+			indexAfterScore = scoreDashIndex + 4;
+		}
+
+		var string5 = string.slice(nameDashIndex+1, indexBeforeScore);
+		console.log(string5);
+
+		var string6 = string.slice(indexBeforeScore, scoreDashIndex);
+		console.log(string6);
+
+		var string7 = string.slice(scoreDashIndex+1, indexAfterScore);
+		console.log(string7);
+
+		
+
+
+
+
+
 
 
 
