@@ -94,34 +94,25 @@ function parseRow(row) {
     string = string.replace("\n", "");
     console.log("string: " + string);
     string = string.replace("\n", "");
-    console.log("string: " + string);
+    console.log("string:'" + string + "'");
 
     var colonIndex = string.indexOf(":");
     //console.log(colonIndex);
 
-    var string2 = string.slice(0,colonIndex-2);
-    console.log(string2);
+    //var stringTime = string.slice(10 ,colonIndex-2);
+    //console.log("Time: " + stringTime);
 
-    var string3 = string.slice(colonIndex-2, colonIndex+3);
-    console.log(string3);
+    var stringTimeHour = string.slice(colonIndex-2, colonIndex).trim();
+    console.log("Time hour: " + stringTimeHour);
+
+    var stringTimeMin = string.slice(colonIndex+1, colonIndex+3).trim();
+    console.log("Time min: " + stringTimeMin);
 
     var nameDashIndex = string.indexOf("-");
     var scoreDashIndex = string.lastIndexOf("-");
 
-    var string4 = string.slice(colonIndex+4, nameDashIndex-1);
-    console.log(string4);
-
-    /*console.log(string[scoreDashIndex]);
-    console.log(string[scoreDashIndex-1]);
-    console.log("-2: " + string[scoreDashIndex-2]);
-    console.log("-3: " + string[scoreDashIndex-3]);
-
-    console.log();
-
-    console.log(string[scoreDashIndex]);
-    console.log(string[scoreDashIndex+1]);
-    console.log("+2: " + string[scoreDashIndex+2]);
-    console.log("+3: " + string[scoreDashIndex+3]);*/
+    var stringHomeTeam = string.slice(colonIndex+4, nameDashIndex-1).trim();
+    console.log("Home team: " + stringHomeTeam);
 
     var indexBeforeScore;
     var indexAfterScore;
@@ -138,12 +129,21 @@ function parseRow(row) {
         indexAfterScore = scoreDashIndex + 4;
     }
 
-    var string5 = string.slice(nameDashIndex+1, indexBeforeScore);
-    console.log(string5);
+    var stringAwayTeam = string.slice(nameDashIndex+1, indexBeforeScore).trim();
+    console.log("Away team: " + stringAwayTeam);
 
-    var string6 = string.slice(indexBeforeScore, scoreDashIndex);
-    console.log(string6);
+    var stringHomeScore = string.slice(indexBeforeScore, scoreDashIndex).trim();
+    console.log("Home score: " + stringHomeScore);
 
-    var string7 = string.slice(scoreDashIndex+1, indexAfterScore);
-    console.log(string7);
+    var stringAwayScore = string.slice(scoreDashIndex+1, indexAfterScore).trim();
+    console.log("Away score: " + stringAwayScore);
+
+    var stringWeekday = string.slice(0,3).trim();
+    console.log("Weekday: " + stringWeekday);
+
+    var stringDay = string.slice(4,6).trim();
+    console.log("Day: " + stringDay);
+
+    var stringMonth = string.slice(7,9).trim();
+    console.log("Month: " + stringMonth);
 }
