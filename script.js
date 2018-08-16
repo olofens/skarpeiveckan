@@ -78,7 +78,8 @@ request(url, function(err, resp, html) {
             console.log(gameRows[i]);
         }
 
-        parseRow(gameRows[0]);
+        var gameObject = parseRow(gameRows[0]);
+        console.log(gameObject.awayTeamName);
 
     }
 });
@@ -146,4 +147,16 @@ function parseRow(row) {
 
     var stringMonth = string.slice(7,9).trim();
     console.log("Month: " + stringMonth);
+
+    return {
+    	weekday:stringWeekday,
+		day:stringDay,
+		month:stringMonth,
+		hour:stringTimeHour,
+		minute:stringTimeMin,
+		homeTeamName:stringHomeTeam,
+		awayTeamName:stringAwayTeam,
+		homeTeamScore:stringHomeScore,
+		awayTeamScore:stringAwayScore
+	};
 }
