@@ -107,39 +107,21 @@ request(url, function(err, resp, html) {
 });
 
 
-function sortGames(gameArray) {
-
-}
-
-
 function parseRow(row) {
-	console.log(row);
     var string = row;
-    console.log("string: " + string);
     string = string.replace("\n", "");
-    console.log("string: " + string);
     string = string.replace("\n", "");
-    console.log("string: " + string);
     string = string.replace("\n", "");
-    console.log("string:'" + string + "'");
 
     var colonIndex = string.indexOf(":");
-    //console.log(colonIndex);
-
-    //var stringTime = string.slice(10 ,colonIndex-2);
-    //console.log("Time: " + stringTime);
 
     var stringTimeHour = string.slice(colonIndex-2, colonIndex).trim();
-    console.log("Time hour: " + stringTimeHour);
-
     var stringTimeMin = string.slice(colonIndex+1, colonIndex+3).trim();
-    console.log("Time min: " + stringTimeMin);
 
     var nameDashIndex = string.indexOf("-");
     var scoreDashIndex = string.lastIndexOf("-");
 
     var stringHomeTeam = string.slice(colonIndex+4, nameDashIndex-1).trim();
-    console.log("Home team: " + stringHomeTeam);
 
     var indexBeforeScore;
     var indexAfterScore;
@@ -157,22 +139,10 @@ function parseRow(row) {
     }
 
     var stringAwayTeam = string.slice(nameDashIndex+1, indexBeforeScore).trim();
-    console.log("Away team: " + stringAwayTeam);
-
     var stringHomeScore = string.slice(indexBeforeScore, scoreDashIndex).trim();
-    console.log("Home score: " + stringHomeScore);
-
     var stringAwayScore = string.slice(scoreDashIndex+1, indexAfterScore).trim();
-    console.log("Away score: " + stringAwayScore);
-
-    var stringWeekday = string.slice(0,3).trim();
-    console.log("Weekday: " + stringWeekday);
-
     var stringDay = string.slice(4,6).trim();
-    console.log("Day: " + stringDay);
-
     var stringMonth = string.slice(7,9).trim();
-    console.log("Month: " + stringMonth);
 
     var gameYear;
     var dateNow = new Date();
