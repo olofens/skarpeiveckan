@@ -70,20 +70,46 @@ request(url, function(err, resp, html) {
         console.log(evenRows);
 
         for (var i = 0; i < oddRows.length; i++) {
-            gameRows[2 * i - 1] = oddRows[i];
-            gameRows[2 * i] = evenRows[i];
+            gameRows[i] = oddRows[i];
         }
 
+        for (var i = oddRows.length; i < oddRows.length + evenRows.length; i++) {
+            gameRows[i] = evenRows[i-oddRows.length];
+        }
+
+        console.log("LENGTH: " + gameRows.length);
+
+        console.log("UNSORTED");
         for (var i = 0; i < gameRows.length; i++) {
-            console.log(gameRows[i]);
+            console.log(i + ": " + gameRows[i]);
+        }
+
+        var gameObjects = [];
+        for (var i = 0; i < gameRows.length; i++) {
+        	gameObjects[i] = parseRow(gameRows[i]);
+		}
+
+        gameObjects.sort(function(a,b) {
+        	if (a.date < b.date) return -1;
+        	else if (a.date > b.date) return 1;
+        	else return 0;
+		});
+
+        console.log("SORTED");
+        for (var i = 0; i < gameObjects.length; i++) {
+            console.log(i + ": " + gameObjects[i].date);
         }
 
         var gameObject = parseRow(gameRows[0]);
         console.log(gameObject.awayTeamName);
-
+        console.log(gameObject.date.toDateString());
     }
 });
 
+
+function sortGames(gameArray) {
+
+}
 
 
 function parseRow(row) {
@@ -148,12 +174,26 @@ function parseRow(row) {
     var stringMonth = string.slice(7,9).trim();
     console.log("Month: " + stringMonth);
 
+    var gameYear;
+    var dateNow = new Date();
+
+    // if date is after june, its last year
+	// else date is before june, its this year
+	// this needs a better system. when the season starts games after june are this year
+	// until after december... need to figure something out here
+    if (Number(stringMonth) > 6) {
+    	gameYear = dateNow.getFullYear()-1;
+	} else {
+    	gameYear = dateNow.getFullYear();
+	}
+
+    var date = new Date(gameYear, Number(stringMonth)-1, Number(stringDay),
+		Number(stringTimeHour), Number(stringTimeMin));
+
+    console.log(date.toDateString());
+
     return {
-    	weekday:stringWeekday,
-		day:stringDay,
-		month:stringMonth,
-		hour:stringTimeHour,
-		minute:stringTimeMin,
+    	date: date,
 		homeTeamName:stringHomeTeam,
 		awayTeamName:stringAwayTeam,
 		homeTeamScore:stringHomeScore,
