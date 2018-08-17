@@ -1,0 +1,15 @@
+body {
+	text-align: center;
+	font-family:"Arial";
+}
+
+ul {
+	list-style-type: none;
+}
+
+li {
+	padding: 20px;
+	background: #d3d3d3;
+	background-position: center;
+	background-attachment: fixed;
+}
