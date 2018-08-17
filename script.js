@@ -3,9 +3,14 @@ var fs = require('fs');
 var cheerio = require("cheerio");
 var request = require("request");
 var cheerioTableparser = require("cheerio-tableparser");
+var express = require("express");
+var app = express();
 
+app.get('/', (req, res) => res.send('Hello World!'));
 
-http.createServer(function (req, res) {
+app.listen(3000, () => console.log('Example app listening on port 3000!'));
+
+/*http.createServer(function (req, res) {
     res.writeHead(200, {'Content-Type': 'text/html'});
     fs.readFile("./index.html", null, function(error, data) {
     	if (error) {
@@ -16,7 +21,7 @@ http.createServer(function (req, res) {
     	}
     	res.end();
     });
-}).listen(8080);
+}).listen(8080);*/
 
 var gameElements = [];
 
