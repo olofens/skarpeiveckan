@@ -5,6 +5,22 @@ block content
   p Welcome to #{title}
   ul
     each val in games
-      ul.game
-        li= val.date.toDateString()
-        li= val.homeTeamName + " " + val.homeTeamScore + " - " + val.awayTeamScore + " " + val.awayTeamName
+      table.game
+        tr
+          td.teampic
+          td.teamname Hemmalag
+          td.teamscore
+          td.date= val.date.toLocaleDateString()
+          td.teamscore
+          td.teamname Bortalag
+          td.teampic
+        tr
+        tr
+          td.teampic bild
+          td.teamname= val.homeTeamName
+          td.teamscore= val.homeTeamScore
+          td.date#center -
+          td.teamscore= val.awayTeamScore
+          td.teamname= val.awayTeamName
+          td.teampic bild
+

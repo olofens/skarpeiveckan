@@ -13,5 +13,30 @@ a {
   list-style-type: none;
   margin: 0 0 5px 0;
   text-align: center;
+  position: relative;
+  width: 100%;
+
+}
+
+#center {
+  alignment: center;
+}
+
+.teampic {
+  width: 10%;
+}
+
+.teamname {
+  width: 20%;
+
+}
+
+.teamscore {
+  width: 5%;
+
+}
+
+.date{
+  width: 10%;
 
 }
