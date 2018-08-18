@@ -6,6 +6,9 @@ var logger = require('morgan');
 var cheerio = require("cheerio");
 var request = require("request");
 var cheerioTableparser = require("cheerio-tableparser");
+var MongoClient = require("mongodb").MongoClient;
+var assert = require("assert");
+
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -45,6 +48,7 @@ app.use(function(err, req, res, next) {
 
 module.exports = app;
 
+var mongourl = "mongodb://localhost:27017/";
 var url = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7931&k=LS7931&p=1";
 function doRequest() {
     request(url, function(err, resp, html) {
@@ -113,6 +117,19 @@ function doRequest() {
             for (var i = 0; i < gameObjects.length; i++) {
                 console.log(i + ": " + gameObjects[i].date);
             }
+
+            MongoClient.connect(mongourl, function(err, db) {
+                if (err) throw err;
+                var dbo = db.db("mydb");
+                var myobj = gameObjects[0];
+                dbo.collection("väst-div2-games").insertOne(myobj, function(err, res) {
+                    if (err) throw err;
+                    console.log("1 document inserted");
+                    db.close();
+                });
+            });
+
+
         }
     });
 }
