@@ -120,11 +120,15 @@ function doRequest() {
 
             MongoClient.connect(mongourl, function(err, db) {
                 if (err) throw err;
+                var myquery = {};
                 var dbo = db.db("mydb");
-                var myobj = gameObjects[0];
-                dbo.collection("väst-div2-games").insertOne(myobj, function(err, res) {
+                dbo.collection("väst-div2-games").deleteMany(myquery, function(err, obj) {
                     if (err) throw err;
-                    console.log("1 document inserted");
+                    console.log(obj.result.n + " game(s) deleted");
+                });
+                dbo.collection("väst-div2-games").insertMany(gameObjects, function(err, res) {
+                    if (err) throw err;
+                    console.log("Games inserted");
                     db.close();
                 });
             });
