@@ -6,3 +6,12 @@ body {
 a {
   color: #00B7FF;
 }
+
+.game {
+  padding: 20px;
+  background: #d3d3d3;
+  list-style-type: none;
+  margin: 0 0 5px 0;
+  text-align: center;
+
+}
