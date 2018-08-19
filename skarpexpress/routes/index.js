@@ -16,7 +16,7 @@ router.get('/', function(req, res, next) {
     var cursor = dbo.collection("väst-div2-games").find();
     cursor.forEach(function(doc, err) {
       if (err) throw err;
-
+      console.log("hello");
       if(getWeekNumber(doc.date) === 3) {
         resultArray.push(doc);
       }
@@ -26,6 +26,10 @@ router.get('/', function(req, res, next) {
     });
   });
 });
+
+function clickfunc() {
+  console.log("click");
+}
 
 
 module.exports = router;
