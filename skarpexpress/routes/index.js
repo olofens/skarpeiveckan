@@ -21,7 +21,7 @@ router.get('/', function(req, res, next) {
       }
     }, function() {
       db.close();
-      res.render('index', {games: resultArray});
+      res.render('index', {gamesjson: JSON.stringify(resultArray), games: resultArray});
     });
   });
 });

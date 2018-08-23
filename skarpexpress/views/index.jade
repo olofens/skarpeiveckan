@@ -1,6 +1,9 @@
 extends layout
 
-mixin makegame(game)
+
+
+mixin makegames(game)
+  -
   table.game
     tr
       td.teampic
@@ -21,11 +24,15 @@ mixin makegame(game)
       td.teampic bild
 
 block content
+
+  script.
+    var gamedata = !{gamesjson};
   h1= title
   script(src="/javascripts/indexscript.js")
   p Welcome to #{title}
   button(onclick="clickfunc()") Click
   ul#gamelist
     each val in games
-      +makegame(val)
+      +makegames(val)
+
 

@@ -19,4 +19,6 @@ function getWeekNumber(d) {
 
 function clickfunc() {
     document.getElementById("gamelist").innerHTML = "";
+    var data = gamedata;
+    console.log(data);
 }
