@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 var MongoClient = require("mongodb").MongoClient;
-var assert = require("assert");
 
 var mongourl = "mongodb://localhost:27017/";
 
@@ -26,11 +25,6 @@ router.get('/', function(req, res, next) {
     });
   });
 });
-
-function clickfunc() {
-  console.log("click");
-}
-
 
 module.exports = router;
 

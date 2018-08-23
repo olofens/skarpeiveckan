@@ -2,8 +2,9 @@ extends layout
 
 block content
   h1= title
+  script(src="/javascripts/indexscript.js")
   p Welcome to #{title}
-  button(onclick="clickfunc();") Click
+  button(onclick="clickfunc()") Click
   ul
     each val in games
       table.game
