@@ -1,28 +1,31 @@
 extends layout
 
+mixin makegame(game)
+  table.game
+    tr
+      td.teampic
+      td.teamname Hemmalag
+      td.teamscore
+      td.date= game.date.toLocaleDateString()
+      td.teamscore
+      td.teamname Bortalag
+      td.teampic
+    tr
+    tr
+      td.teampic bild
+      td.teamname= game.homeTeamName
+      td.teamscore= game.homeTeamScore
+      td.date#center -
+      td.teamscore= game.awayTeamScore
+      td.teamname= game.awayTeamName
+      td.teampic bild
+
 block content
   h1= title
   script(src="/javascripts/indexscript.js")
   p Welcome to #{title}
   button(onclick="clickfunc()") Click
-  ul
+  ul#gamelist
     each val in games
-      table.game
-        tr
-          td.teampic
-          td.teamname Hemmalag
-          td.teamscore
-          td.date= val.date.toLocaleDateString()
-          td.teamscore
-          td.teamname Bortalag
-          td.teampic
-        tr
-        tr
-          td.teampic bild
-          td.teamname= val.homeTeamName
-          td.teamscore= val.homeTeamScore
-          td.date#center -
-          td.teamscore= val.awayTeamScore
-          td.teamname= val.awayTeamName
-          td.teampic bild
+      +makegame(val)
 

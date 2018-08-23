@@ -18,5 +18,5 @@ function getWeekNumber(d) {
 }
 
 function clickfunc() {
-    console.log("current week: " + getCurrentWeek());
+    console.log(document.getElementById("gamelist").innerHTML = "");
 }
