@@ -18,7 +18,16 @@ function getWeekNumber(d) {
 }
 
 function clickfunc() {
-    document.getElementById("gamelist").innerHTML = "";
+    var ul = document.getElementById("gamelist");
+    ul.innerHTML = "";
     var data = gamedata;
     console.log(data);
+
+    for (var i = 0; i < 3; i++) {
+        var li = document.createElement("li");
+        li.appendChild(document.createTextNode("Hello"));
+        ul.appendChild(li);
+    }
 }
+
+var selectedWeek = getWeekNumber(new Date());
