@@ -17,17 +17,51 @@ function getWeekNumber(d) {
     return weekNo;
 }
 
-function clickfunc() {
+function prevClick() {
+
+    selectedWeek--;
+    showWeekGames(selectedWeek);
+}
+
+function nextClick() {
+    selectedWeek++;
+    showWeekGames(selectedWeek);
+}
+
+function showWeekGames(week) {
+    updateWeek(week);
     var ul = document.getElementById("gamelist");
     ul.innerHTML = "";
     var data = gamedata;
     console.log(data);
 
-    for (var i = 0; i < 3; i++) {
+
+    var thisWeekGamesArray = [];
+    data.forEach( function(doc, err) {
+       if (err) console.log(err.message);
+       if (getWeekNumber(new Date(doc.date)) === week) {
+           thisWeekGamesArray.push(doc);
+       }
+    });
+
+    thisWeekGamesArray.forEach( function (doc, err) {
+        if(err) console.log(err.message);
         var li = document.createElement("li");
-        li.appendChild(document.createTextNode("Hello"));
+        li.appendChild(document.createTextNode(doc.homeTeamName + " - " + doc.awayTeamName));
         ul.appendChild(li);
-    }
+    });
+
 }
 
-var selectedWeek = getWeekNumber(new Date());
+var weekStringElement;
+function doFirstWeek() {
+    updateWeek(12);
+}
+
+function updateWeek(week) {
+    weekStringElement = document.getElementById("weeknr");
+    weekStringElement.innerHTML = "Vecka " + week;
+    console.log("ran do week");
+}
+
+var selectedWeek = getCurrentWeek();

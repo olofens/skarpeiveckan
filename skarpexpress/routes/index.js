@@ -16,9 +16,7 @@ router.get('/', function(req, res, next) {
     cursor.forEach(function(doc, err) {
       if (err) throw err;
       console.log("hello");
-      if(getWeekNumber(doc.date) === 3) {
-        resultArray.push(doc);
-      }
+      resultArray.push(doc);
     }, function() {
       db.close();
       res.render('index', {gamesjson: JSON.stringify(resultArray), games: resultArray});

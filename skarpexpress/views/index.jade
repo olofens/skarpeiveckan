@@ -25,12 +25,15 @@ mixin makegames(game)
 
 block content
 
+  script(src="/javascripts/indexscript.js")
   script.
     var gamedata = !{gamesjson};
   h1= title
-  script(src="/javascripts/indexscript.js")
   p Welcome to #{title}
-  button(onclick="clickfunc()") Click
+  button(onclick="prevClick()") Förra veckan
+  #weeknr Vecka xx
+  script doFirstWeek()
+  button(onclick="nextClick()") Nästa vecka
   ul#gamelist
     each val in games
       +makegames(val)
