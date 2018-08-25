@@ -33,8 +33,6 @@ function showWeekGames(week) {
     var ul = document.getElementById("gamelist");
     ul.innerHTML = "";
     var data = gamedata;
-    console.log(data);
-
 
     var thisWeekGamesArray = [];
     data.forEach( function(doc, err) {
@@ -55,13 +53,13 @@ function showWeekGames(week) {
 
 var weekStringElement;
 function doFirstWeek() {
-    updateWeek(12);
+    updateWeek(selectedWeek);
 }
 
 function updateWeek(week) {
     weekStringElement = document.getElementById("weeknr");
     weekStringElement.innerHTML = "Vecka " + week;
-    console.log("ran do week");
 }
 
-var selectedWeek = getCurrentWeek();
+//replace this with getCurrentWeek() later when testing is done
+var selectedWeek = 12;

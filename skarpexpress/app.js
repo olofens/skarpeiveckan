@@ -75,6 +75,12 @@ function doRequest() {
                 oddRows[i] = $(this).text();
             });
 
+            console.log("HEREHREHERHERHERHERHEHRER");
+            $().each(function (i, elem) {
+                console.log("HERE: ");
+                console.log($(this).text());
+            });
+
             $(".even").each(function (i, elem) {
                 evenRows[i] = $(this).text();
             });
