@@ -67,31 +67,35 @@ function doRequest() {
                 }
             }
 
+
+
             var oddRows = [];
             var evenRows = [];
             var gameRows = [];
 
-            $(".odd").each(function (i, elem) {
-                oddRows[i] = $(this).text();
-            });
 
-            console.log("HEREHREHERHERHERHERHEHRER");
-            $().each(function (i, elem) {
-                console.log("HERE: ");
-                console.log($(this).text());
+
+            $(".odd").each(function (i, elem) {
+                var matchID = $(this).attr("onclick");
+                matchID = matchID.slice(matchID.length-9, matchID.length-1);
+
+                oddRows.push([$(this).text(), matchID, "place"]);
             });
 
             $(".even").each(function (i, elem) {
-                evenRows[i] = $(this).text();
+                var matchID = $(this).attr("onclick");
+                matchID = matchID.slice(matchID.length-9, matchID.length-1);
+
+                evenRows.push([$(this).text(), matchID, "place"]);
             });
 
             oddRows.join(", ");
-            console.log("ODD " + oddRows.length);
-            console.log(oddRows);
+            //console.log("ODD " + oddRows.length);
+            //console.log(oddRows);
 
             evenRows.join(", ");
-            console.log("EVEN " + evenRows.length);
-            console.log(evenRows);
+            //console.log("EVEN " + evenRows.length);
+            //console.log(evenRows);
 
             for (var i = 0; i < oddRows.length; i++) {
                 gameRows[i] = oddRows[i];
@@ -101,27 +105,31 @@ function doRequest() {
                 gameRows[i] = evenRows[i-oddRows.length];
             }
 
-            console.log("LENGTH: " + gameRows.length);
+            //console.log("LENGTH: " + gameRows.length);
 
-            console.log("UNSORTED");
+            /*console.log("UNSORTED");
             for (var i = 0; i < gameRows.length; i++) {
                 console.log(i + ": " + gameRows[i]);
-            }
+            }*/
 
             var gameObjects = [];
             for (var i = 0; i < gameRows.length; i++) {
-                gameObjects[i] = parseRow(gameRows[i]);
+                gameObjects.push([parseRow(gameRows[i][0]), gameRows[i][1], gameRows[i][2]]);
             }
 
+
+
+
             gameObjects.sort(function(a,b) {
-                if (a.date < b.date) return -1;
-                else if (a.date > b.date) return 1;
+                if (a[0].date < b[0].date) return -1;
+                else if (a[0].date > b[0].date) return 1;
                 else return 0;
             });
 
+
             console.log("SORTED");
             for (var i = 0; i < gameObjects.length; i++) {
-                console.log(i + ": " + gameObjects[i].date);
+                console.log(i + ": " + gameObjects[i][0].date);
             }
 
             MongoClient.connect(mongourl, function(err, db) {
@@ -211,7 +219,7 @@ function parseRow(row) {
 
 setInterval(function() {
     var date = new Date();
-    if ( date.getSeconds() === 0 || date.getSeconds() === 30) {
+    if ( date.getSeconds() % 10 === 0) {
         doRequest();
     }
 }, 1000);
