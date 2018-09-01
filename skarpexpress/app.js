@@ -49,7 +49,7 @@ app.use(function(err, req, res, next) {
 module.exports = app;
 
 var mongourl = "mongodb://localhost:27017/";
-var url = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7931&k=LS7931&p=1";
+var url = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7931&k=LS7931&p=1&m=30138740&sy=0";
 function doRequest() {
     request(url, function(err, resp, html) {
         if (!err && resp.statusCode == 200) {
@@ -72,6 +72,14 @@ function doRequest() {
             var oddRows = [];
             var evenRows = [];
             var gameRows = [];
+
+            $(".row tr").each(function(i,elem) {
+               if ($(this).text().includes("Spelplats")) {
+                   var string = $(this).text();
+                   var gamePlace = string.replace("Spelplats", "");
+               }
+            });
+
 
 
 
@@ -129,7 +137,7 @@ function doRequest() {
 
             console.log("SORTED");
             for (var i = 0; i < gameObjects.length; i++) {
-                console.log(i + ": " + gameObjects[i][0].date);
+                //console.log(i + ": " + gameObjects[i][0].date);
             }
 
             MongoClient.connect(mongourl, function(err, db) {
