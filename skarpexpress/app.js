@@ -49,10 +49,25 @@ app.use(function(err, req, res, next) {
 module.exports = app;
 
 var mongourl = "mongodb://localhost:27017/";
-var url = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7931&k=LS7931&p=1&m=30138740&sy=0";
-function doRequest() {
+var url = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7931&k=LS7931&p=1";
+function doRequestGetGamePlace(url) {
     request(url, function(err, resp, html) {
-        if (!err && resp.statusCode == 200) {
+        if (!err && resp.statusCode === 200) {
+            var $ = cheerio.load(html);
+
+            $(".row tr").each(function(i,elem) {
+                if ($(this).text().includes("Spelplats")) {
+                    var string = $(this).text();
+                    var gamePlace = string.replace("Spelplats", "");
+                }
+            });
+        }
+    });
+}
+
+function doRequestUpdateGames() {
+    request(url, function(err, resp, html) {
+        if (!err && resp.statusCode === 200) {
             var $ = cheerio.load(html);
             //var table = $("#tabell_std");
 
@@ -67,33 +82,23 @@ function doRequest() {
                 }
             }
 
-
-
             var oddRows = [];
             var evenRows = [];
             var gameRows = [];
 
-            $(".row tr").each(function(i,elem) {
-               if ($(this).text().includes("Spelplats")) {
-                   var string = $(this).text();
-                   var gamePlace = string.replace("Spelplats", "");
-               }
-            });
-
-
-
-
             $(".odd").each(function (i, elem) {
                 var matchID = $(this).attr("onclick");
+                console.log(matchID);
                 matchID = matchID.slice(matchID.length-9, matchID.length-1);
-
+                console.log(matchID);
                 oddRows.push([$(this).text(), matchID, "place"]);
             });
 
             $(".even").each(function (i, elem) {
                 var matchID = $(this).attr("onclick");
+                console.log(matchID);
                 matchID = matchID.slice(matchID.length-9, matchID.length-1);
-
+                console.log(matchID);
                 evenRows.push([$(this).text(), matchID, "place"]);
             });
 
@@ -122,22 +127,23 @@ function doRequest() {
 
             var gameObjects = [];
             for (var i = 0; i < gameRows.length; i++) {
-                gameObjects.push([parseRow(gameRows[i][0]), gameRows[i][1], gameRows[i][2]]);
+                //gameObjects.push([parseRow(gameRows[i][0]), gameRows[i][1], gameRows[i][2]]);
+                gameObjects.push(objectify((gameRows[i][0]), gameRows[i][1], gameRows[i][2]));
             }
 
 
 
 
             gameObjects.sort(function(a,b) {
-                if (a[0].date < b[0].date) return -1;
-                else if (a[0].date > b[0].date) return 1;
+                if (a.date < b.date) return -1;
+                else if (a.date > b.date) return 1;
                 else return 0;
             });
 
 
             console.log("SORTED");
             for (var i = 0; i < gameObjects.length; i++) {
-                //console.log(i + ": " + gameObjects[i][0].date);
+                console.log(i + ": " + gameObjects[i].date);
             }
 
             MongoClient.connect(mongourl, function(err, db) {
@@ -161,7 +167,7 @@ function doRequest() {
 }
 
 
-function parseRow(row) {
+function objectify(row, gameID, gameLocation) {
     var string = row;
     string = string.replace("\n", "");
     string = string.replace("\n", "");
@@ -221,14 +227,16 @@ function parseRow(row) {
         homeTeamName:stringHomeTeam,
         awayTeamName:stringAwayTeam,
         homeTeamScore:stringHomeScore,
-        awayTeamScore:stringAwayScore
+        awayTeamScore:stringAwayScore,
+        gameID: gameID,
+        gameLocation: gameLocation
     };
 }
 
 setInterval(function() {
     var date = new Date();
     if ( date.getSeconds() % 10 === 0) {
-        doRequest();
+        doRequestUpdateGames();
     }
 }, 1000);
 
