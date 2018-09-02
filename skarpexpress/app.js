@@ -148,20 +148,29 @@ function doRequestUpdateGames() {
 
             MongoClient.connect(mongourl, function(err, db) {
                 if (err) throw err;
-                var myquery = {};
                 var dbo = db.db("mydb");
-                dbo.collection("väst-div2-games").deleteMany(myquery, function(err, obj) {
-                    if (err) throw err;
-                    console.log(obj.result.n + " game(s) deleted");
-                });
-                dbo.collection("väst-div2-games").insertMany(gameObjects, function(err, res) {
-                    if (err) throw err;
-                    console.log("Games inserted");
-                    db.close();
-                });
+
+                dbo.collection("väst-div2-games").deleteMany({});
+
+                for (var i = 0; i < gameObjects.length; i++) {
+                    dbo.collection("väst-div2-games").updateOne(
+                        {"gameID":gameObjects[i].gameID},
+                        { $set: {
+                                "homeTeamName":   gameObjects[i].homeTeamName,
+                                "awayTeamName":   gameObjects[i].awayTeamName,
+                                "homeTeamScore":  gameObjects[i].homeTeamScore,
+                                "awayTeamScore":  gameObjects[i].awayTeamScore,
+                                "gameID":         gameObjects[i].gameID,
+                                "gameLocation":   gameObjects[i].gameLocation
+                            }
+                        },
+                        {upsert: true}
+                    );
+                    console.log(i + " - updated this: " + gameObjects[i]);
+                }
+
+                db.close();
             });
-
-
         }
     });
 }
