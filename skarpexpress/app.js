@@ -65,6 +65,38 @@ function doRequestGetGamePlace(url) {
     });
 }
 
+function doRequestGetLinks() {
+    var url2 = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7916&k=LS7916&p=1";
+    request(url2, function(err, resp, html) {
+        if (!err && resp.statusCode === 200) {
+            var $ = cheerio.load(html);
+
+            console.log("RANNNNN");
+
+            var divisionNumbers = [];
+            var links = [];
+
+            $(".dropdown-menu li").each(function(i,elem) {
+                var linkHtml = $(this).html();
+                linkHtml = linkHtml.substring(linkHtml.indexOf('"') + 1, linkHtml.lastIndexOf('"'));
+                if (linkHtml.includes("SBF_SERIE_AVD")) {
+                     divisionNumbers.push(linkHtml.slice(32, linkHtml.indexOf("&")));
+                }
+            });
+            console.log(divisionNumbers.toString());
+
+            for (var i = 0; i < divisionNumbers.length; i++) {
+                links.push("https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD"
+                    + divisionNumbers[i] + "&k=LS"
+                    + divisionNumbers[i].substring(0,4) + "&p=1")
+            }
+
+            console.log(links.toString());
+
+        }
+    });
+}
+
 function doRequestUpdateGames() {
     request(url, function(err, resp, html) {
         if (!err && resp.statusCode === 200) {
@@ -81,6 +113,12 @@ function doRequestUpdateGames() {
                     console.log(data[0][i]);
                 }
             }
+
+
+            var divisionName;
+            $(".row h3").each(function(i,elem) {
+                divisionName = $(this).text();
+            });
 
             var oddRows = [];
             var evenRows = [];
@@ -153,7 +191,7 @@ function doRequestUpdateGames() {
                 dbo.collection("väst-div2-games").deleteMany({});
 
                 for (var i = 0; i < gameObjects.length; i++) {
-                    dbo.collection("väst-div2-games").updateOne(
+                    dbo.collection(divisionName).updateOne(
                         {"gameID":gameObjects[i].gameID},
                         { $set: {
                                 "homeTeamName":   gameObjects[i].homeTeamName,
@@ -245,7 +283,8 @@ function objectify(row, gameID, gameLocation) {
 setInterval(function() {
     var date = new Date();
     if ( date.getSeconds() % 10 === 0) {
-        doRequestUpdateGames();
+        doRequestGetLinks();
+        //doRequestUpdateGames();
     }
 }, 1000);
 
