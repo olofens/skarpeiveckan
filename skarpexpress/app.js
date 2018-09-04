@@ -66,6 +66,7 @@ function doRequestGetGamePlace(url) {
 }
 
 function doRequestGetLinks() {
+    var links = [];
     var url2 = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7916&k=LS7916&p=1";
     request(url2, function(err, resp, html) {
         if (!err && resp.statusCode === 200) {
@@ -74,7 +75,7 @@ function doRequestGetLinks() {
             console.log("RANNNNN");
 
             var divisionNumbers = [];
-            var links = [];
+
 
             $(".dropdown-menu li").each(function(i,elem) {
                 var linkHtml = $(this).html();
@@ -91,10 +92,64 @@ function doRequestGetLinks() {
                     + divisionNumbers[i].substring(0,4) + "&p=1")
             }
 
-            console.log(links.toString());
+            MongoClient.connect(mongourl, function(err, db) {
+                if (err) throw err;
+                var dbo = db.db("mydb");
+                var i;
+                var reqNr = 0;
+                for (i = 0; i < links.length; i++) {
+
+                    request(links[i], function(err, resp, html) {
+                        if (!err && resp.statusCode === 200) {
+                            var $ = cheerio.load(html);
+                            reqNr++;
+
+
+
+
+                            $(".row h3").each(function(i,elem) {
+                                dbo.collection("links").updateOne(
+                                    {"division":$(this).text()},
+                                    { $set: {
+                                            "division": $(this).text(),
+                                            "link": links[i]
+                                        }
+                                    },
+                                    {upsert: true}
+                                    );
+                                if (reqNr === links.length) db.close();
+                            });
+                        }
+                    });
+
+                }
+
+
+            });
+
 
         }
     });
+}
+
+//for testing
+function getSeriesNamesTest(links) {
+    console.log("STARTING");
+    for (var i = 0; i < links.length; i++) {
+        request(links[i], function(err, resp, html) {
+            if (!err && resp.statusCode === 200) {
+                var $ = cheerio.load(html);
+
+
+
+                $(".row h3").each(function(i,elem) {
+                    console.log($(this).text());
+                });
+
+
+            }
+        });
+    }
 }
 
 function doRequestUpdateGames() {
@@ -280,11 +335,13 @@ function objectify(row, gameID, gameLocation) {
     };
 }
 
-setInterval(function() {
+
+doRequestGetLinks();
+/*setInterval(function() {
     var date = new Date();
-    if ( date.getSeconds() % 10 === 0) {
+    if ( date.getSeconds() % 20 === 0) {
         doRequestGetLinks();
         //doRequestUpdateGames();
     }
-}, 1000);
+}, 1000);*/
 
