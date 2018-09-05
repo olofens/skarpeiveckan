@@ -65,6 +65,20 @@ function doRequestGetGamePlace(url) {
     });
 }
 
+function updateAllSeries() {
+    MongoClient.connect(mongourl, function(err, db) {
+        if (err) throw err;
+        var dbo = db.db("mydb");
+
+        dbo.collection("links").find({}).toArray(function(err, result) {
+           if (err) throw err;
+           console.log(result);
+           db.close();
+        });
+
+    });
+}
+
 function doRequestGetLinks() {
     var links = [];
     var url2 = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7916&k=LS7916&p=1";
@@ -92,42 +106,25 @@ function doRequestGetLinks() {
                     + divisionNumbers[i].substring(0,4) + "&p=1")
             }
 
+            console.log(links);
+
+            for (var i = 0; i < links.length; i++) {
+                links[i] = { link: links[i] };
+            }
+
             MongoClient.connect(mongourl, function(err, db) {
                 if (err) throw err;
                 var dbo = db.db("mydb");
-                var i;
-                var reqNr = 0;
-                for (i = 0; i < links.length; i++) {
 
-                    request(links[i], function(err, resp, html) {
-                        if (!err && resp.statusCode === 200) {
-                            var $ = cheerio.load(html);
-                            reqNr++;
-
-
-
-
-                            $(".row h3").each(function(i,elem) {
-                                dbo.collection("links").updateOne(
-                                    {"division":$(this).text()},
-                                    { $set: {
-                                            "division": $(this).text(),
-                                            "link": links[i]
-                                        }
-                                    },
-                                    {upsert: true}
-                                    );
-                                if (reqNr === links.length) db.close();
-                            });
-                        }
-                    });
-
-                }
-
-
+                dbo.collection("links").deleteMany({}, function(err, res) {
+                    if (err) throw err;
+                    console.log("Number of documents deleted: " + res.deletedCount);
+                });
+                dbo.collection("links").insertMany(links, function(err, res) {
+                    if (err) throw err;
+                    console.log("Number of documents inserted: " + res.insertedCount);
+                });
             });
-
-
         }
     });
 }
@@ -335,7 +332,7 @@ function objectify(row, gameID, gameLocation) {
     };
 }
 
-
+//updateAllSeries();
 doRequestGetLinks();
 /*setInterval(function() {
     var date = new Date();
