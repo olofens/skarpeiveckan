@@ -50,7 +50,7 @@ module.exports = app;
 
 var mongourl = "mongodb://localhost:27017/";
 var url = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7931&k=LS7931&p=1";
-function doRequestGetGamePlace(url) {
+function doRequestGetGamePlace(url, mycallback) {
     request(url, function(err, resp, html) {
         if (!err && resp.statusCode === 200) {
             var $ = cheerio.load(html);
@@ -60,8 +60,110 @@ function doRequestGetGamePlace(url) {
                     var string = $(this).text();
                     var gamePlace = string.replace("Spelplats", "");
                 }
+
             });
         }
+    });
+}
+
+/*function updateAllSeriesGameLocations() {
+    MongoClient.connect(mongourl, function(err, db) {
+        if (err) throw err;
+        var dbo = db.db("mydb");
+
+        dbo.collection("links").find({}).toArray(function(err, res) {
+            db.close();
+
+            for (var i = 0; i < res.length; i++) {
+                request(res[i].link, function(err, resp, html) {
+                    if (!err && resp.statusCode === 200) {
+                        var $ = cheerio.load(html);
+
+                        $(".row h3").each(function(i,elem) {
+                            console.log("ran");
+                            updateSeriesGameLocations($(this).text());
+                        console.log("ran outside");
+                    }
+                });
+            }
+        });
+    });
+}*/
+
+function updateSeriesGameLocations(series) {
+    MongoClient.connect(mongourl, function(err, db) {
+        if (err) throw err;
+        var dbo = db.db("mydb");
+
+        dbo.collection(series).find({}).toArray(function(err, res) {
+            if (err) throw err;
+            var foundString;
+            var gamePlace;
+            var dbUpdates = 0;
+            var times = 0;
+            for (var i = 90; i < res.length; i++) {
+                times++;
+                request(res[i].gameLink, function(err, resp, html) {
+                    console.log(times);
+                    console.log("TIMES: " + times);
+                    if (err) {
+                        console.log(err.message);
+                        throw err;
+                    }
+                    if (!err && resp.statusCode === 200) {
+                        //console.log("inhere");
+                        var $ = cheerio.load(html);
+
+                        var onclickArray = [];
+
+                        $(".row tr").each(function(i2,elem) {
+
+                            onclickArray.push($(this).text());
+                            //console.log(i2 + " text: " + $(this).text());
+
+                            if ($(this).text().includes("Spelplats") ) {
+                                //console.log("found at " + i2);
+
+                                var string = $(this).text();
+                                gamePlace = string.replace("Spelplats", "");
+                                //console.log(gamePlace);
+                                for (var j = i2; j > 0; j--) {
+                                    if (onclickArray[j].includes("Detaljer")) {
+                                        foundString = onclickArray[j];
+                                        j = 0;
+                                    }
+                                }
+                            }
+                        });
+
+                        console.log("found string: " + foundString);
+                        var foundObject = objectify(foundString, "", gamePlace);
+                        //console.log("a foundobject: " + foundObject.date + ", " + foundObject.homeTeamName + " - " + foundObject.awayTeamName);
+                        //console.log(foundObject);
+                        dbo.collection(series).updateOne(
+                            {   date: foundObject.date,
+                                homeTeamName: foundObject.homeTeamName,
+                                awayTeamName: foundObject.awayTeamName
+                            },
+                            {$set: { gameLocation: foundObject.gameLocation }
+                            },
+                            function(err, res) {
+                                if (err) {
+                                    console.log("error here bud");
+                                    throw err;
+                                }
+                                console.log(res.result.nModified + " documents updated");
+                                dbUpdates++;
+                                console.log("dbupdates: " + dbUpdates);
+                                if (dbUpdates === res.length) {
+                                    db.close();
+                                }
+                            }
+                        );
+                    }
+                });
+            }
+        });
     });
 }
 
@@ -132,6 +234,16 @@ function doRequestGetLinks() {
         }
     });
 }
+
+function linkify(link, gameID) {
+    //före
+    //https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7916&k=LS7916&p=1
+    //efter
+    //https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7916&k=LS7916&p=1&m=29776869&sy=0
+    //https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7916&k=LS7916&p=1&m=29776863&sy=0
+    return link + "&m=" + gameID + "&sy=0";
+}
+
 
 //for testing
 function getSeriesNamesTest(links) {
@@ -244,18 +356,28 @@ function doRequestUpdateGames(seriesurl) {
                 if (err) throw err;
                 var dbo = db.db("mydb");
 
-                dbo.collection("väst-div2-games").deleteMany({});
-
                 for (var i = 0; i < gameObjects.length; i++) {
+                    dbo.collection(divisionName).find({gameID:gameObjects[i].gameID}).toArray(function(err, res) {
+                        if(res[0].gameLocation === "place") {
+                            console.log("gamelocation is place");
+                        } else {
+                            console.log("gamelocation is not place. set to database truth");
+                            gameObjects[i].gameLocation = res[0].gameLocation;
+                        }
+                    });
+
+
                     dbo.collection(divisionName).updateOne(
-                        {"gameID":gameObjects[i].gameID},
+                        {gameID:gameObjects[i].gameID},
                         { $set: {
-                                "homeTeamName":   gameObjects[i].homeTeamName,
-                                "awayTeamName":   gameObjects[i].awayTeamName,
-                                "homeTeamScore":  gameObjects[i].homeTeamScore,
-                                "awayTeamScore":  gameObjects[i].awayTeamScore,
-                                "gameID":         gameObjects[i].gameID,
-                                "gameLocation":   gameObjects[i].gameLocation
+                                date:           gameObjects[i].date,
+                                homeTeamName:   gameObjects[i].homeTeamName,
+                                awayTeamName:   gameObjects[i].awayTeamName,
+                                homeTeamScore:  gameObjects[i].homeTeamScore,
+                                awayTeamScore:  gameObjects[i].awayTeamScore,
+                                gameID:         gameObjects[i].gameID,
+                                gameLocation:   gameObjects[i].gameLocation,
+                                gameLink:       linkify(seriesurl, gameObjects[i].gameID)
                             }
                         },
                         {upsert: true}
@@ -336,13 +458,16 @@ function objectify(row, gameID, gameLocation) {
     };
 }
 
-updateAllSeries();
+//updateAllSeriesGameLocations();
+//doRequestUpdateGames("https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7916&k=LS7916&p=1");
+updateSeriesGameLocations("Elitserien Herr");
+//updateAllSeries();
 //doRequestGetLinks();
 /*setInterval(function() {
     var date = new Date();
-    if ( date.getSeconds() % 20 === 0) {
-        doRequestGetLinks();
+    if ( date.getSeconds() % 30 === 0) {
+        updateAllSeries();
         //doRequestUpdateGames();
     }
-}, 1000);*/
-
+}, 1000);
+*/
