@@ -72,7 +72,11 @@ function updateAllSeries() {
 
         dbo.collection("links").find({}).toArray(function(err, result) {
            if (err) throw err;
-           console.log(result);
+
+           for (var i = 0; i < result.length; i++) {
+               doRequestUpdateGames(result[i].link);
+           }
+
            db.close();
         });
 
@@ -149,8 +153,8 @@ function getSeriesNamesTest(links) {
     }
 }
 
-function doRequestUpdateGames() {
-    request(url, function(err, resp, html) {
+function doRequestUpdateGames(seriesurl) {
+    request(seriesurl, function(err, resp, html) {
         if (!err && resp.statusCode === 200) {
             var $ = cheerio.load(html);
             //var table = $("#tabell_std");
@@ -332,8 +336,8 @@ function objectify(row, gameID, gameLocation) {
     };
 }
 
-//updateAllSeries();
-doRequestGetLinks();
+updateAllSeries();
+//doRequestGetLinks();
 /*setInterval(function() {
     var date = new Date();
     if ( date.getSeconds() % 20 === 0) {
