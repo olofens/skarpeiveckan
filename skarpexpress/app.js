@@ -8,6 +8,8 @@ var request = require("request");
 var cheerioTableparser = require("cheerio-tableparser");
 var MongoClient = require("mongodb").MongoClient;
 var assert = require("assert");
+var sem = require("semaphore")(20);
+var syncrequest = require("sync-request");
 
 
 var indexRouter = require('./routes/index');
@@ -391,8 +393,135 @@ function doRequestUpdateGames(seriesurl) {
     });
 }
 
+function newTestDoRequestUpdateGames(seriesurl) {
+    var html = syncrequest("GET", seriesurl);
+    var $ = cheerio.load(html.getBody());
+    //var table = $("#tabell_std");
+
+    var doTable = false;
+    if (doTable) {
+        cheerioTableparser($);
+        var data = $("#tabell_std").parsetable(true, true, true);
+        console.log(data);
+
+        for (var i = 0; i < data[0].length; i++) {
+            console.log(data[0][i]);
+        }
+    }
+
+
+    var divisionName;
+    $(".row h3").each(function(i,elem) {
+        divisionName = $(this).text();
+    });
+
+    var oddRows = [];
+    var evenRows = [];
+    var gameRows = [];
+
+    $(".odd").each(function (i, elem) {
+        var matchID = $(this).attr("onclick");
+        console.log(matchID);
+        matchID = matchID.slice(matchID.length-9, matchID.length-1);
+        console.log(matchID);
+        oddRows.push([$(this).text(), matchID, "place"]);
+    });
+
+    $(".even").each(function (i, elem) {
+        var matchID = $(this).attr("onclick");
+        console.log(matchID);
+        matchID = matchID.slice(matchID.length-9, matchID.length-1);
+        console.log(matchID);
+        evenRows.push([$(this).text(), matchID, "place"]);
+    });
+
+    oddRows.join(", ");
+    //console.log("ODD " + oddRows.length);
+    //console.log(oddRows);
+
+    evenRows.join(", ");
+    //console.log("EVEN " + evenRows.length);
+    //console.log(evenRows);
+
+    for (var i = 0; i < oddRows.length; i++) {
+        gameRows[i] = oddRows[i];
+    }
+
+    for (var i = oddRows.length; i < oddRows.length + evenRows.length; i++) {
+        gameRows[i] = evenRows[i-oddRows.length];
+    }
+
+    //console.log("LENGTH: " + gameRows.length);
+
+    /*console.log("UNSORTED");
+    for (var i = 0; i < gameRows.length; i++) {
+        console.log(i + ": " + gameRows[i]);
+    }*/
+
+    var gameObjects = [];
+    for (var i = 0; i < gameRows.length; i++) {
+        gameObjects.push(objectify((gameRows[i][0]), gameRows[i][1], gameRows[i][2]));
+    }
+
+
+
+
+    gameObjects.sort(function(a,b) {
+        if (a.date < b.date) return -1;
+        else if (a.date > b.date) return 1;
+        else return 0;
+    });
+
+
+    console.log("SORTED");
+    for (var i = 0; i < gameObjects.length; i++) {
+        console.log(i + ": " + gameObjects[i].date);
+    }
+
+    MongoClient.connect(mongourl, function(err, db) {
+        if (err) throw err;
+        var dbo = db.db("mydb");
+
+        for (var j = 0; j < gameObjects.length; j++) {
+            console.log("LENGTH: " + gameObjects.length);
+            console.log("starting j = " + j);
+            dbo.collection(divisionName).find({gameID:gameObjects[j].gameID}).toArray(function(err, res) {
+                if(res[0].gameLocation === "place") {
+                    console.log("gamelocation is: " + res[0].gameLocation);
+                } else if (j !== gameObjects.length) {
+                    console.log("gamelocation is not place. set to database truth");
+                    console.log("looking at j = " + j);
+                    console.log("game stats: " + gameObjects[j].gameID);
+                    gameObjects[j].gameLocation = res[0].gameLocation;
+                }
+            });
+
+
+            dbo.collection(divisionName).updateOne(
+                {gameID:gameObjects[j].gameID},
+                { $set: {
+                        date:           gameObjects[j].date,
+                        homeTeamName:   gameObjects[j].homeTeamName,
+                        awayTeamName:   gameObjects[j].awayTeamName,
+                        homeTeamScore:  gameObjects[j].homeTeamScore,
+                        awayTeamScore:  gameObjects[j].awayTeamScore,
+                        gameID:         gameObjects[j].gameID,
+                        gameLocation:   gameObjects[j].gameLocation,
+                        gameLink:       linkify(seriesurl, gameObjects[j].gameID)
+                    }
+                },
+                {upsert: true}
+            );
+            console.log(j + " - updated this: " + gameObjects[j].gameLocation);
+        }
+
+        db.close();
+    });
+}
+
 
 function objectify(row, gameID, gameLocation) {
+    console.log(row);
     var string = row;
     string = string.replace("\n", "");
     string = string.replace("\n", "");
@@ -458,9 +587,19 @@ function objectify(row, gameID, gameLocation) {
     };
 }
 
+function testSyncReq() {
+    for (var i = 0; i < 20; i++) {
+        var res = syncrequest("GET", "https://www.google.se/")
+        console.log("res " +  i + ": " + res.getBody());
+    }
+}
+
+var kskurl = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7916&k=LS7916&p=1";
+//testSyncReq();
+newTestDoRequestUpdateGames(kskurl);
 //updateAllSeriesGameLocations();
 //doRequestUpdateGames("https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7916&k=LS7916&p=1");
-updateSeriesGameLocations("Elitserien Herr");
+//updateSeriesGameLocations("Elitserien Herr");
 //updateAllSeries();
 //doRequestGetLinks();
 /*setInterval(function() {
