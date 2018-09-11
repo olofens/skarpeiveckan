@@ -196,29 +196,57 @@ function doRequestGetLinks() {
 
             console.log("RANNNNN");
 
-            var divisionNumbers = [];
+            var linkObjects = [];
 
 
             $(".dropdown-menu li").each(function(i,elem) {
                 var linkHtml = $(this).html();
-                linkHtml = linkHtml.substring(linkHtml.indexOf('"') + 1, linkHtml.lastIndexOf('"'));
-                if (linkHtml.includes("SBF_SERIE_AVD")) {
-                     divisionNumbers.push(linkHtml.slice(32, linkHtml.indexOf("&")));
+                //console.log(linkHtml);
+                var linkHtmlLink = linkHtml.substring(linkHtml.indexOf('"') + 1, linkHtml.lastIndexOf('"'));
+
+
+                var linkHtmlName = linkHtml.substring(linkHtml.indexOf(">") + 1, linkHtml.lastIndexOf("<"));
+                while (linkHtmlName.includes("&")) {
+                    console.log(linkHtmlName);
+                    if (linkHtmlName.includes("&#xE5;")) linkHtmlName = linkHtmlName.replace("&#xE5;", "å");
+                    if (linkHtmlName.includes("&#xC5;")) linkHtmlName = linkHtmlName.replace("&#xC5;", "Å");
+                    if (linkHtmlName.includes("&#xE4;")) linkHtmlName = linkHtmlName.replace("&#xE4;", "ä");
+                    if (linkHtmlName.includes("&#xC4;")) linkHtmlName = linkHtmlName.replace("&#xC4;", "Ä");
+                    if (linkHtmlName.includes("&#xF6;")) linkHtmlName = linkHtmlName.replace("&#xF6;", "ö");
+                    if (linkHtmlName.includes("&#xD6;")) linkHtmlName = linkHtmlName.replace("&#xD6;", "Ö");
+                    console.log(linkHtmlName);
+                }
+
+                if (linkHtmlLink.includes("SBF_SERIE_AVD")) {
+                    linkObjects.push({
+                        name: linkHtmlName,
+                        link: linkHtmlLink.slice(32, linkHtmlLink.indexOf("&"))
+                    });
                 }
             });
-            console.log(divisionNumbers.toString());
 
-            for (var i = 0; i < divisionNumbers.length; i++) {
+            for (var i = 0; i < linkObjects.length; i++) {
+                linkObjects[i].link = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD"
+                    + linkObjects[i].link + "&k=LS"
+                    + linkObjects[i].link.substring(0,4) + "&p=1";
+            }
+
+            /*for (var i = 0; i < linkObjects.length; i++) {
                 links.push("https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD"
-                    + divisionNumbers[i] + "&k=LS"
-                    + divisionNumbers[i].substring(0,4) + "&p=1")
+                    + linkObjects[i].link + "&k=LS"
+                    + linkObjects[i].link.substring(0,4) + "&p=1")
             }
 
-            console.log(links);
+            console.log("links below");
+            console.log(links);*/
 
-            for (var i = 0; i < links.length; i++) {
-                links[i] = { link: links[i] };
-            }
+            console.log(linkObjects)
+
+
+
+            /*for (var j = 0; j < links.length; j++) {
+                links[j] = { link: links[j] };
+            }*/
 
             MongoClient.connect(mongourl, function(err, db) {
                 if (err) throw err;
@@ -228,7 +256,7 @@ function doRequestGetLinks() {
                     if (err) throw err;
                     console.log("Number of documents deleted: " + res.deletedCount);
                 });
-                dbo.collection("links").insertMany(links, function(err, res) {
+                dbo.collection("links").insertMany(linkObjects, function(err, res) {
                     if (err) throw err;
                     console.log("Number of documents inserted: " + res.insertedCount);
                 });
@@ -596,12 +624,12 @@ function testSyncReq() {
 
 var kskurl = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7916&k=LS7916&p=1";
 //testSyncReq();
-newTestDoRequestUpdateGames(kskurl);
+//newTestDoRequestUpdateGames(kskurl);
 //updateAllSeriesGameLocations();
 //doRequestUpdateGames("https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7916&k=LS7916&p=1");
 //updateSeriesGameLocations("Elitserien Herr");
 //updateAllSeries();
-//doRequestGetLinks();
+doRequestGetLinks();
 /*setInterval(function() {
     var date = new Date();
     if ( date.getSeconds() % 30 === 0) {
