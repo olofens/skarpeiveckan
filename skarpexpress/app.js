@@ -52,21 +52,6 @@ module.exports = app;
 
 var mongourl = "mongodb://localhost:27017/";
 var url = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7931&k=LS7931&p=1";
-function doRequestGetGamePlace(url, mycallback) {
-    request(url, function(err, resp, html) {
-        if (!err && resp.statusCode === 200) {
-            var $ = cheerio.load(html);
-
-            $(".row tr").each(function(i,elem) {
-                if ($(this).text().includes("Spelplats")) {
-                    var string = $(this).text();
-                    var gamePlace = string.replace("Spelplats", "");
-                }
-
-            });
-        }
-    });
-}
 
 /*function updateAllSeriesGameLocations() {
     MongoClient.connect(mongourl, function(err, db) {
@@ -92,6 +77,8 @@ function doRequestGetGamePlace(url, mycallback) {
     });
 }*/
 
+
+
 function updateSeriesGameLocations(series) {
     MongoClient.connect(mongourl, function(err, db) {
         if (err) throw err;
@@ -103,71 +90,67 @@ function updateSeriesGameLocations(series) {
             var gamePlace;
             var dbUpdates = 0;
             var times = 0;
-            for (var i = 90; i < res.length; i++) {
+            for (var i = 0; i < res.length; i++) {
                 times++;
-                request(res[i].gameLink, function(err, resp, html) {
-                    console.log(times);
-                    console.log("TIMES: " + times);
-                    if (err) {
-                        console.log(err.message);
-                        throw err;
-                    }
-                    if (!err && resp.statusCode === 200) {
-                        //console.log("inhere");
-                        var $ = cheerio.load(html);
+                console.log("sending request: " + i);
+                var requestResult = syncrequest("GET", res[i].gameLink);
+                console.log("request returned: " + i);
+                var html = requestResult.getBody();
 
-                        var onclickArray = [];
 
-                        $(".row tr").each(function(i2,elem) {
+                var $ = cheerio.load(html);
 
-                            onclickArray.push($(this).text());
-                            //console.log(i2 + " text: " + $(this).text());
+                var onclickArray = [];
 
-                            if ($(this).text().includes("Spelplats") ) {
-                                //console.log("found at " + i2);
+                $(".row tr").each(function(i2,elem) {
 
-                                var string = $(this).text();
-                                gamePlace = string.replace("Spelplats", "");
-                                //console.log(gamePlace);
-                                for (var j = i2; j > 0; j--) {
-                                    if (onclickArray[j].includes("Detaljer")) {
-                                        foundString = onclickArray[j];
-                                        j = 0;
-                                    }
-                                }
+                    onclickArray.push($(this).text());
+                    //console.log(i2 + " text: " + $(this).text());
+
+                    if ($(this).text().includes("Spelplats") ) {
+                        //console.log("found at " + i2);
+
+                        var string = $(this).text();
+                        gamePlace = string.replace("Spelplats", "");
+                        console.log(gamePlace);
+                        for (var j = i2; j > 0; j--) {
+                            if (onclickArray[j].includes("Detaljer")) {
+                                foundString = onclickArray[j];
+                                j = 0;
                             }
-                        });
-
-                        console.log("found string: " + foundString);
-                        var foundObject = objectify(foundString, "", gamePlace);
-                        //console.log("a foundobject: " + foundObject.date + ", " + foundObject.homeTeamName + " - " + foundObject.awayTeamName);
-                        //console.log(foundObject);
-                        dbo.collection(series).updateOne(
-                            {   date: foundObject.date,
-                                homeTeamName: foundObject.homeTeamName,
-                                awayTeamName: foundObject.awayTeamName
-                            },
-                            {$set: { gameLocation: foundObject.gameLocation }
-                            },
-                            function(err, res) {
-                                if (err) {
-                                    console.log("error here bud");
-                                    throw err;
-                                }
-                                console.log(res.result.nModified + " documents updated");
-                                dbUpdates++;
-                                console.log("dbupdates: " + dbUpdates);
-                                if (dbUpdates === res.length) {
-                                    db.close();
-                                }
-                            }
-                        );
+                        }
                     }
                 });
+
+                console.log("found string: " + foundString);
+                var foundObject = objectify(foundString, "", gamePlace);
+                //console.log("a foundobject: " + foundObject.date + ", " + foundObject.homeTeamName + " - " + foundObject.awayTeamName);
+                //console.log(foundObject);
+                dbo.collection(series).updateOne(
+                    {   date: foundObject.date,
+                        homeTeamName: foundObject.homeTeamName,
+                        awayTeamName: foundObject.awayTeamName
+                    },
+                    {$set: { gameLocation: foundObject.gameLocation }
+                    },
+                    function(err, res) {
+                        if (err) {
+                            console.log("error here bud");
+                            throw err;
+                        }
+                        console.log(res.result.nModified + " documents updated");
+                        dbUpdates++;
+                        console.log("dbupdates: " + dbUpdates);
+                        if (dbUpdates === res.length) {
+                            db.close();
+                        }
+                    }
+                );
             }
         });
     });
 }
+
 
 function updateAllSeries() {
     MongoClient.connect(mongourl, function(err, db) {
@@ -176,14 +159,158 @@ function updateAllSeries() {
 
         dbo.collection("links").find({}).toArray(function(err, result) {
            if (err) throw err;
-
-           for (var i = 0; i < result.length; i++) {
-               doRequestUpdateGames(result[i].link);
-           }
-
            db.close();
+           for (var i = 0; i < result.length; i++) {
+               (function(tmp_i) {
+                   console.log("Starting update on series: " + result[tmp_i].name);
+                   doRequestUpdateGames(result[tmp_i].link);
+               })(i);
+           }
         });
+    });
+}
 
+function updateAllSeries2() {
+    MongoClient.connect(mongourl, function(err, db) {
+        if (err) throw err;
+        var dbo = db.db("mydb");
+
+        dbo.collection("links").find({}).toArray(function(err, result) {
+            if (err) throw err;
+            db.close();
+            doRequestUpdateGames2(result, 135, result.length);
+        });
+    });
+}
+
+function doRequestUpdateGames2(linkList, currentIndex, maxIndex) {
+
+    if (currentIndex === maxIndex) return;
+    var seriesurl = linkList[currentIndex].link;
+    var html = syncrequest("GET", seriesurl);
+    var $ = cheerio.load(html.getBody());
+    //var table = $("#tabell_std");
+
+    var doTable = false;
+    if (doTable) {
+        cheerioTableparser($);
+        var data = $("#tabell_std").parsetable(true, true, true);
+        console.log(data);
+
+        for (var i = 0; i < data[0].length; i++) {
+            console.log(data[0][i]);
+        }
+    }
+
+
+    var divisionName;
+    $(".row h3").each(function(i,elem) {
+        divisionName = $(this).text();
+    });
+
+    var oddRows = [];
+    var evenRows = [];
+    var gameRows = [];
+
+    $(".odd").each(function (i, elem) {
+        var matchID = $(this).attr("onclick");
+        //console.log(matchID);
+        matchID = matchID.slice(matchID.length-9, matchID.length-1);
+        //console.log(matchID);
+        oddRows.push([$(this).text(), matchID, "place"]);
+    });
+
+    $(".even").each(function (i, elem) {
+        //console.log("An even game: ");
+        var matchID = $(this).attr("onclick");
+        matchID = matchID.slice(matchID.length-9, matchID.length-1);
+        // console.log("matchID: " + matchID);
+        //console.log("text: " + $(this).text());
+        evenRows.push([$(this).text(), matchID, "place"]);
+    });
+
+    oddRows.join(", ");
+    evenRows.join(", ");
+
+    for (var i = 0; i < oddRows.length; i++) {
+        gameRows[i] = oddRows[i];
+    }
+
+    for (var i = oddRows.length; i < oddRows.length + evenRows.length; i++) {
+        gameRows[i] = evenRows[i-oddRows.length];
+    }
+
+    var gameObjects = [];
+    for (var i = 0; i < gameRows.length; i++) {
+        gameObjects.push(objectify((gameRows[i][0]), gameRows[i][1], gameRows[i][2]));
+    }
+
+    gameObjects.sort(function(a,b) {
+        if (a.date < b.date) return -1;
+        else if (a.date > b.date) return 1;
+        else return 0;
+    });
+
+    MongoClient.connect(mongourl, function(err, db) {
+        if (err) throw err;
+        var dbo = db.db("mydb");
+
+        dbo.collection(divisionName).find({}).toArray(function(err, res) {
+            //console.log(divisionName);
+            //console.log(res);
+            if (res.length === 0) {
+                //console.log("hello");
+                //we just created this collection
+            } else {
+                //collection here from before
+                //we want to get the games' places and put in gameObjects
+                for (var i = 0; i < gameObjects.length; i++) {
+                    (function(tmp_id){
+                        dbo.collection(divisionName).find({ gameID: gameObjects[tmp_id].gameID }).toArray(function(err, res) {
+                            gameObjects[tmp_id].gameLocation = res[0].gameLocation;
+                        });
+                    })(i);
+
+                }
+
+            }
+            if (res.length !== gameObjects.length) {
+                dbo.collection(divisionName).deleteMany({}, function(err, obj) {
+                    if (err) throw err;
+                    //console.log(obj.result.n + " documents deleted in " + divisionName);
+                })
+            }
+            var nUpdates = 0;
+            for (var i = 0; i < gameObjects.length; i++) {
+                (function(tmp_id){
+                    dbo.collection(divisionName).updateOne({gameID: gameObjects[tmp_id].gameID},
+                        { $set: {
+                                played:         gameObjects[tmp_id].played,
+                                date:           gameObjects[tmp_id].date,
+                                homeTeamName:   gameObjects[tmp_id].homeTeamName,
+                                awayTeamName:   gameObjects[tmp_id].awayTeamName,
+                                homeTeamScore:  gameObjects[tmp_id].homeTeamScore,
+                                awayTeamScore:  gameObjects[tmp_id].awayTeamScore,
+                                gameID:         gameObjects[tmp_id].gameID,
+                                //gameLocation:   gameObjects[tmp_id].gameLocation,
+                                gameLink:       linkify(seriesurl, gameObjects[tmp_id].gameID)
+                            }
+                        },
+                        {upsert: true},
+                        function(err, res) {
+                            if (err) throw err;
+                            //console.log(res.result.nModified + " documents updated, nr " + tmp_id);
+                            nUpdates++;
+                            if (nUpdates === gameObjects.length) {
+                                //console.log("now at i = " + i + ", closing db.");
+                                db.close();
+                                console.log("finished updating " + divisionName);
+                                doRequestUpdateGames2(linkList, currentIndex+1, maxIndex);
+                            }
+                        });
+                })(i);
+            }
+        });
     });
 }
 
@@ -275,361 +402,151 @@ function linkify(link, gameID) {
 }
 
 
-//for testing
-function getSeriesNamesTest(links) {
-    console.log("STARTING");
-    for (var i = 0; i < links.length; i++) {
-        request(links[i], function(err, resp, html) {
-            if (!err && resp.statusCode === 200) {
-                var $ = cheerio.load(html);
-
-
-
-                $(".row h3").each(function(i,elem) {
-                    console.log($(this).text());
-                });
-
-
-            }
-        });
-    }
-}
-
-function doRequestUpdateGames(seriesurl) {
-    request(seriesurl, function(err, resp, html) {
-        if (!err && resp.statusCode === 200) {
-            var $ = cheerio.load(html);
-            //var table = $("#tabell_std");
-
-            var doTable = false;
-            if (doTable) {
-                cheerioTableparser($);
-                var data = $("#tabell_std").parsetable(true, true, true);
-                console.log(data);
-
-                for (var i = 0; i < data[0].length; i++) {
-                    console.log(data[0][i]);
-                }
-            }
-
-
-            var divisionName;
-            $(".row h3").each(function(i,elem) {
-                divisionName = $(this).text();
-            });
-
-            var oddRows = [];
-            var evenRows = [];
-            var gameRows = [];
-
-            $(".odd").each(function (i, elem) {
-                var matchID = $(this).attr("onclick");
-                console.log(matchID);
-                matchID = matchID.slice(matchID.length-9, matchID.length-1);
-                console.log(matchID);
-                oddRows.push([$(this).text(), matchID, "place"]);
-            });
-
-            $(".even").each(function (i, elem) {
-                var matchID = $(this).attr("onclick");
-                console.log(matchID);
-                matchID = matchID.slice(matchID.length-9, matchID.length-1);
-                console.log(matchID);
-                evenRows.push([$(this).text(), matchID, "place"]);
-            });
-
-            oddRows.join(", ");
-            //console.log("ODD " + oddRows.length);
-            //console.log(oddRows);
-
-            evenRows.join(", ");
-            //console.log("EVEN " + evenRows.length);
-            //console.log(evenRows);
-
-            for (var i = 0; i < oddRows.length; i++) {
-                gameRows[i] = oddRows[i];
-            }
-
-            for (var i = oddRows.length; i < oddRows.length + evenRows.length; i++) {
-                gameRows[i] = evenRows[i-oddRows.length];
-            }
-
-            //console.log("LENGTH: " + gameRows.length);
-
-            /*console.log("UNSORTED");
-            for (var i = 0; i < gameRows.length; i++) {
-                console.log(i + ": " + gameRows[i]);
-            }*/
-
-            var gameObjects = [];
-            for (var i = 0; i < gameRows.length; i++) {
-                //gameObjects.push([parseRow(gameRows[i][0]), gameRows[i][1], gameRows[i][2]]);
-                gameObjects.push(objectify((gameRows[i][0]), gameRows[i][1], gameRows[i][2]));
-            }
-
-
-
-
-            gameObjects.sort(function(a,b) {
-                if (a.date < b.date) return -1;
-                else if (a.date > b.date) return 1;
-                else return 0;
-            });
-
-
-            console.log("SORTED");
-            for (var i = 0; i < gameObjects.length; i++) {
-                console.log(i + ": " + gameObjects[i].date);
-            }
-
-            MongoClient.connect(mongourl, function(err, db) {
-                if (err) throw err;
-                var dbo = db.db("mydb");
-
-                for (var i = 0; i < gameObjects.length; i++) {
-                    dbo.collection(divisionName).find({gameID:gameObjects[i].gameID}).toArray(function(err, res) {
-                        if(res[0].gameLocation === "place") {
-                            console.log("gamelocation is place");
-                        } else {
-                            console.log("gamelocation is not place. set to database truth");
-                            gameObjects[i].gameLocation = res[0].gameLocation;
-                        }
-                    });
-
-
-                    dbo.collection(divisionName).updateOne(
-                        {gameID:gameObjects[i].gameID},
-                        { $set: {
-                                date:           gameObjects[i].date,
-                                homeTeamName:   gameObjects[i].homeTeamName,
-                                awayTeamName:   gameObjects[i].awayTeamName,
-                                homeTeamScore:  gameObjects[i].homeTeamScore,
-                                awayTeamScore:  gameObjects[i].awayTeamScore,
-                                gameID:         gameObjects[i].gameID,
-                                gameLocation:   gameObjects[i].gameLocation,
-                                gameLink:       linkify(seriesurl, gameObjects[i].gameID)
-                            }
-                        },
-                        {upsert: true}
-                    );
-                    console.log(i + " - updated this: " + gameObjects[i]);
-                }
-
-                db.close();
-            });
-        }
-    });
-}
-
-function newTestDoRequestUpdateGames(seriesurl) {
-    var html = syncrequest("GET", seriesurl);
-    var $ = cheerio.load(html.getBody());
-    //var table = $("#tabell_std");
-
-    var doTable = false;
-    if (doTable) {
-        cheerioTableparser($);
-        var data = $("#tabell_std").parsetable(true, true, true);
-        console.log(data);
-
-        for (var i = 0; i < data[0].length; i++) {
-            console.log(data[0][i]);
-        }
-    }
-
-
-    var divisionName;
-    $(".row h3").each(function(i,elem) {
-        divisionName = $(this).text();
-    });
-
-    var oddRows = [];
-    var evenRows = [];
-    var gameRows = [];
-
-    $(".odd").each(function (i, elem) {
-        var matchID = $(this).attr("onclick");
-        console.log(matchID);
-        matchID = matchID.slice(matchID.length-9, matchID.length-1);
-        console.log(matchID);
-        oddRows.push([$(this).text(), matchID, "place"]);
-    });
-
-    $(".even").each(function (i, elem) {
-        var matchID = $(this).attr("onclick");
-        console.log(matchID);
-        matchID = matchID.slice(matchID.length-9, matchID.length-1);
-        console.log(matchID);
-        evenRows.push([$(this).text(), matchID, "place"]);
-    });
-
-    oddRows.join(", ");
-    //console.log("ODD " + oddRows.length);
-    //console.log(oddRows);
-
-    evenRows.join(", ");
-    //console.log("EVEN " + evenRows.length);
-    //console.log(evenRows);
-
-    for (var i = 0; i < oddRows.length; i++) {
-        gameRows[i] = oddRows[i];
-    }
-
-    for (var i = oddRows.length; i < oddRows.length + evenRows.length; i++) {
-        gameRows[i] = evenRows[i-oddRows.length];
-    }
-
-    //console.log("LENGTH: " + gameRows.length);
-
-    /*console.log("UNSORTED");
-    for (var i = 0; i < gameRows.length; i++) {
-        console.log(i + ": " + gameRows[i]);
-    }*/
-
-    var gameObjects = [];
-    for (var i = 0; i < gameRows.length; i++) {
-        gameObjects.push(objectify((gameRows[i][0]), gameRows[i][1], gameRows[i][2]));
-    }
-
-
-
-
-    gameObjects.sort(function(a,b) {
-        if (a.date < b.date) return -1;
-        else if (a.date > b.date) return 1;
-        else return 0;
-    });
-
-
-    console.log("SORTED");
-    for (var i = 0; i < gameObjects.length; i++) {
-        console.log(i + ": " + gameObjects[i].date);
-    }
-
-    MongoClient.connect(mongourl, function(err, db) {
-        if (err) throw err;
-        var dbo = db.db("mydb");
-
-        for (var j = 0; j < gameObjects.length; j++) {
-            console.log("LENGTH: " + gameObjects.length);
-            console.log("starting j = " + j);
-            dbo.collection(divisionName).find({gameID:gameObjects[j].gameID}).toArray(function(err, res) {
-                if(res[0].gameLocation === "place") {
-                    console.log("gamelocation is: " + res[0].gameLocation);
-                } else if (j !== gameObjects.length) {
-                    console.log("gamelocation is not place. set to database truth");
-                    console.log("looking at j = " + j);
-                    console.log("game stats: " + gameObjects[j].gameID);
-                    gameObjects[j].gameLocation = res[0].gameLocation;
-                }
-            });
-
-
-            dbo.collection(divisionName).updateOne(
-                {gameID:gameObjects[j].gameID},
-                { $set: {
-                        date:           gameObjects[j].date,
-                        homeTeamName:   gameObjects[j].homeTeamName,
-                        awayTeamName:   gameObjects[j].awayTeamName,
-                        homeTeamScore:  gameObjects[j].homeTeamScore,
-                        awayTeamScore:  gameObjects[j].awayTeamScore,
-                        gameID:         gameObjects[j].gameID,
-                        gameLocation:   gameObjects[j].gameLocation,
-                        gameLink:       linkify(seriesurl, gameObjects[j].gameID)
-                    }
-                },
-                {upsert: true}
-            );
-            console.log(j + " - updated this: " + gameObjects[j].gameLocation);
-        }
-
-        db.close();
-    });
-}
 
 
 function objectify(row, gameID, gameLocation) {
-    console.log(row);
-    var string = row;
-    string = string.replace("\n", "");
-    string = string.replace("\n", "");
-    string = string.replace("\n", "");
+    if (row.includes("Detaljer")) {
+        //console.log(row);
+        var string = row;
+        string = string.replace("\n", "");
+        string = string.replace("\n", "");
+        string = string.replace("\n", "");
 
-    var colonIndex = string.indexOf(":");
+        var colonIndex = string.indexOf(":");
 
-    var stringTimeHour = string.slice(colonIndex-2, colonIndex).trim();
-    var stringTimeMin = string.slice(colonIndex+1, colonIndex+3).trim();
+        var stringTimeHour = string.slice(colonIndex-2, colonIndex).trim();
+        var stringTimeMin = string.slice(colonIndex+1, colonIndex+3).trim();
 
-    var nameDashIndex = string.indexOf("-");
-    var scoreDashIndex = string.lastIndexOf("-");
+        var nameDashIndex = string.indexOf("-");
+        var scoreDashIndex = string.lastIndexOf("-");
 
-    var stringHomeTeam = string.slice(colonIndex+4, nameDashIndex-1).trim();
+        var stringHomeTeam = string.slice(colonIndex+4, nameDashIndex-1).trim();
 
-    var indexBeforeScore;
-    var indexAfterScore;
+        var indexBeforeScore;
+        var indexAfterScore;
 
-    if (string[scoreDashIndex-3] === "") {
-        indexBeforeScore = scoreDashIndex - 3;
+        if (string[scoreDashIndex-3] === "") {
+            indexBeforeScore = scoreDashIndex - 3;
+        } else {
+            indexBeforeScore = scoreDashIndex - 4;
+        }
+
+        if (string[scoreDashIndex + 3] === "") {
+            indexAfterScore = scoreDashIndex + 3;
+        } else {
+            indexAfterScore = scoreDashIndex + 4;
+        }
+
+        var stringAwayTeam = string.slice(nameDashIndex+1, indexBeforeScore).trim();
+        var stringHomeScore = string.slice(indexBeforeScore, scoreDashIndex).trim();
+        var stringAwayScore = string.slice(scoreDashIndex+1, indexAfterScore).trim();
+        var stringDay = string.slice(4,6).trim();
+        var stringMonth = string.slice(7,9).trim();
+
+        var gameYear;
+        var dateNow = new Date();
+
+        // if date is after june, its last year
+        // else date is before june, its this year
+        // this needs a better system. when the season starts games after june are this year
+        // until after december... need to figure something out here
+        if (Number(stringMonth) > 6) {
+            gameYear = dateNow.getFullYear()-1;
+        } else {
+            gameYear = dateNow.getFullYear();
+        }
+
+        var date = new Date(gameYear, Number(stringMonth)-1, Number(stringDay),
+            Number(stringTimeHour), Number(stringTimeMin));
+
+        //console.log(date.toDateString());
+
+        return {
+            played: true,
+            date: date,
+            homeTeamName:stringHomeTeam,
+            awayTeamName:stringAwayTeam,
+            homeTeamScore:stringHomeScore,
+            awayTeamScore:stringAwayScore,
+            gameID: gameID,
+            gameLocation: gameLocation
+        };
     } else {
-        indexBeforeScore = scoreDashIndex - 4;
+        //console.log("Starting objectification...");
+        //console.log("input row: '" + row + "'");
+
+        var string = row;
+        string = string.replace("\n", "");
+        string = string.replace("\n", "");
+        string = string.replace("\n", "");
+
+        //console.log("Cutting complete. New string: '" + string + "'");
+
+        string = string.replace(/\s*$/,"");
+
+        //console.log("Removed whitespaces at end: '" + string + "'");
+
+        var colonIndex = string.indexOf(":");
+
+        var stringTimeHour = string.slice(colonIndex-2, colonIndex).trim();
+        var stringTimeMin = string.slice(colonIndex+1, colonIndex+3).trim();
+
+        //console.log("Hour: '" + stringTimeHour + "'");
+        //console.log("Min: '" + stringTimeMin + "'");
+
+        var slashIndex = string.indexOf("/");
+        var stringDay = string.slice(slashIndex-2, slashIndex).trim();
+        var stringMonth = string.slice(slashIndex+1, slashIndex+3).trim();
+
+        //console.log("Day: '" + stringDay + "'");
+        //console.log("Month: '" + stringMonth + "'");
+
+        var gameYear;
+        var dateNow = new Date();
+
+        if (Number(stringMonth) > 6) {
+            gameYear = dateNow.getFullYear();
+        } else {
+            gameYear = dateNow.getFullYear()+1;
+        }
+
+        var date = new Date(gameYear, Number(stringMonth)-1, Number(stringDay),
+            Number(stringTimeHour), Number(stringTimeMin));
+
+        //console.log(date.toDateString());
+
+        var dashIndex = string.indexOf(" - ");
+        //console.log("dash at: " + dashIndex);
+
+        var stringHomeTeam = string.slice(colonIndex+4, dashIndex);
+        var stringAwayTeam = string.slice(dashIndex+3, string.length);
+        //console.log("home: '" + stringHomeTeam + "'");
+        //console.log("away: '" + stringAwayTeam + "'");
+
+        return {
+            played: false,
+            date: date,
+            homeTeamName:stringHomeTeam,
+            awayTeamName:stringAwayTeam,
+            homeTeamScore:"-",
+            awayTeamScore:"-",
+            gameID: gameID,
+            gameLocation: gameLocation
+        };
     }
-
-    if (string[scoreDashIndex + 3] === "") {
-        indexAfterScore = scoreDashIndex + 3;
-    } else {
-        indexAfterScore = scoreDashIndex + 4;
-    }
-
-    var stringAwayTeam = string.slice(nameDashIndex+1, indexBeforeScore).trim();
-    var stringHomeScore = string.slice(indexBeforeScore, scoreDashIndex).trim();
-    var stringAwayScore = string.slice(scoreDashIndex+1, indexAfterScore).trim();
-    var stringDay = string.slice(4,6).trim();
-    var stringMonth = string.slice(7,9).trim();
-
-    var gameYear;
-    var dateNow = new Date();
-
-    // if date is after june, its last year
-    // else date is before june, its this year
-    // this needs a better system. when the season starts games after june are this year
-    // until after december... need to figure something out here
-    if (Number(stringMonth) > 6) {
-        gameYear = dateNow.getFullYear()-1;
-    } else {
-        gameYear = dateNow.getFullYear();
-    }
-
-    var date = new Date(gameYear, Number(stringMonth)-1, Number(stringDay),
-        Number(stringTimeHour), Number(stringTimeMin));
-
-    console.log(date.toDateString());
-
-    return {
-        date: date,
-        homeTeamName:stringHomeTeam,
-        awayTeamName:stringAwayTeam,
-        homeTeamScore:stringHomeScore,
-        awayTeamScore:stringAwayScore,
-        gameID: gameID,
-        gameLocation: gameLocation
-    };
 }
 
-function testSyncReq() {
-    for (var i = 0; i < 20; i++) {
-        var res = syncrequest("GET", "https://www.google.se/")
-        console.log("res " +  i + ": " + res.getBody());
-    }
-}
-
-var kskurl = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7916&k=LS7916&p=1";
+var kskurl = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7931&k=LS7931&p=1";
+var eliturl = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD9753&k=LS9753&p=1";
+var dameliturlold = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7932&k=LS7932&p=1";
 //testSyncReq();
-//newTestDoRequestUpdateGames(kskurl);
+//newTestDoRequestUpdateGames(dameliturlold);
 //updateAllSeriesGameLocations();
 //doRequestUpdateGames("https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7916&k=LS7916&p=1");
-//updateSeriesGameLocations("Elitserien Herr");
-//updateAllSeries();
-doRequestGetLinks();
+updateSeriesGameLocations("Herr Div 2 Sydväst");
+updateAllSeries2();
+//doRequestGetLinks();
+//TESTupdateSeriesGameLocations("Elitserien Herr");
 /*setInterval(function() {
     var date = new Date();
     if ( date.getSeconds() % 30 === 0) {
@@ -638,3 +555,4 @@ doRequestGetLinks();
     }
 }, 1000);
 */
+
