@@ -40,6 +40,7 @@ for x in mydoc:
   print(x["date"])
   date = x["date"] + timedelta(hours=1)
   print(date)
+  dateString = date.strftime("%a, %d %b, %H:%M")
 
   if newWeek != oldWeek:
   	sheet.cell(excelRowCount, 1).value = ""
@@ -47,15 +48,15 @@ for x in mydoc:
   	sheet.cell(excelRowCount, 1).value = "Vecka"
   	sheet.cell(excelRowCount, 2).value = newWeek
   	excelRowCount = excelRowCount + 1
-  	sheet.cell(excelRowCount, 1).value = date
-  	sheet.cell(excelRowCount, 2).value = getWeekday(date.weekday())
+  	sheet.cell(excelRowCount, 1).value = dateString
+  	#sheet.cell(excelRowCount, 2).value = getWeekday(date.weekday())
   	sheet.cell(excelRowCount, 3).value = x["homeTeamName"]
   	sheet.cell(excelRowCount, 4).value = x["awayTeamName"]
   	sheet.cell(excelRowCount, 5).value = x["series"]
   	excelRowCount = excelRowCount + 1
   else:
-  	sheet.cell(excelRowCount, 1).value = date
-  	sheet.cell(excelRowCount, 2).value = getWeekday(date.weekday())
+  	sheet.cell(excelRowCount, 1).value = dateString
+  	#sheet.cell(excelRowCount, 2).value = getWeekday(date.weekday())
   	sheet.cell(excelRowCount, 3).value = x["homeTeamName"]
   	sheet.cell(excelRowCount, 4).value = x["awayTeamName"]
   	sheet.cell(excelRowCount, 5).value = x["series"]
