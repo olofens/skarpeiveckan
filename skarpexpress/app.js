@@ -53,33 +53,25 @@ module.exports = app;
 var mongourl = "mongodb://localhost:27017/";
 var url = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7931&k=LS7931&p=1";
 
-/*function updateAllSeriesGameLocations() {
+function updateAllSeriesGameLocations() {
     MongoClient.connect(mongourl, function(err, db) {
         if (err) throw err;
         var dbo = db.db("mydb");
 
         dbo.collection("links").find({}).toArray(function(err, res) {
             db.close();
-
-            for (var i = 0; i < res.length; i++) {
-                request(res[i].link, function(err, resp, html) {
-                    if (!err && resp.statusCode === 200) {
-                        var $ = cheerio.load(html);
-
-                        $(".row h3").each(function(i,elem) {
-                            console.log("ran");
-                            updateSeriesGameLocations($(this).text());
-                        console.log("ran outside");
-                    }
-                });
-            }
+            updateSeriesGameLocations(res, 0, res.length);
         });
     });
-}*/
+}
 
 
 
-function updateSeriesGameLocations(series) {
+function updateSeriesGameLocations(linkList, currentIndex, maxIndex) {
+    if (currentIndex === maxIndex) return;
+    var series = linkList[currentIndex].name;
+    console.log("Updating locations for series: " + series);
+
     MongoClient.connect(mongourl, function(err, db) {
         if (err) throw err;
         var dbo = db.db("mydb");
@@ -114,7 +106,8 @@ function updateSeriesGameLocations(series) {
                         gamePlace = string.replace("Spelplats", "");
                         console.log(gamePlace);
                         for (var j = i2; j > 0; j--) {
-                            if (onclickArray[j].includes("Detaljer")) {
+                            if (onclickArray[j].includes(" - ")) {
+                                console.log("found string.........");
                                 foundString = onclickArray[j];
                                 j = 0;
                             }
@@ -133,16 +126,19 @@ function updateSeriesGameLocations(series) {
                     },
                     {$set: { gameLocation: foundObject.gameLocation }
                     },
-                    function(err, res) {
+                    function(err, result) {
+                        console.log("reslength: " + res.length);
                         if (err) {
                             console.log("error here bud");
                             throw err;
                         }
-                        console.log(res.result.nModified + " documents updated");
+                        console.log(result.result.nModified + " documents updated");
                         dbUpdates++;
                         console.log("dbupdates: " + dbUpdates);
                         if (dbUpdates === res.length) {
                             db.close();
+                            console.log("restarting");
+                            return updateSeriesGameLocations(linkList, currentIndex+1, maxIndex);
                         }
                     }
                 );
@@ -178,7 +174,7 @@ function updateAllSeries2() {
         dbo.collection("links").find({}).toArray(function(err, result) {
             if (err) throw err;
             db.close();
-            doRequestUpdateGames2(result, 135, result.length);
+            doRequestUpdateGames2(result, 0, result.length);
         });
     });
 }
@@ -224,7 +220,7 @@ function doRequestUpdateGames2(linkList, currentIndex, maxIndex) {
         //console.log("An even game: ");
         var matchID = $(this).attr("onclick");
         matchID = matchID.slice(matchID.length-9, matchID.length-1);
-        // console.log("matchID: " + matchID);
+        //console.log("matchID: " + matchID);
         //console.log("text: " + $(this).text());
         evenRows.push([$(this).text(), matchID, "place"]);
     });
@@ -255,6 +251,7 @@ function doRequestUpdateGames2(linkList, currentIndex, maxIndex) {
         if (err) throw err;
         var dbo = db.db("mydb");
 
+        console.log("divisionName: " + divisionName);
         dbo.collection(divisionName).find({}).toArray(function(err, res) {
             //console.log(divisionName);
             //console.log(res);
@@ -314,9 +311,33 @@ function doRequestUpdateGames2(linkList, currentIndex, maxIndex) {
     });
 }
 
+function removeCollections() {
+    MongoClient.connect(mongourl, function(err, db) {
+        if (err) throw err;
+        var dbo = db.db("mydb");
+
+        dbo.collections(function (err, collections) {
+            for (var i = 0; i < collections.length; i++) {
+                (function(tmp_id) {
+                    if(collections[tmp_id].collectionName !== "links") {
+                        dbo.collection(collections[tmp_id].collectionName).drop(function(err, delOK) {
+                            if (err) throw err;
+                            if (delOK) console.log(collections[tmp_id].collectionName + " deleted.")
+                        });
+                    }
+                })(i);
+            }
+
+            console.log(collections[0].collectionName);
+        });
+
+
+    });
+}
+
 function doRequestGetLinks() {
     var links = [];
-    var url2 = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7916&k=LS7916&p=1";
+    var url2 = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD9753&k=LS9753&p=1";
     request(url2, function(err, resp, html) {
         if (!err && resp.statusCode === 200) {
             var $ = cheerio.load(html);
@@ -352,10 +373,48 @@ function doRequestGetLinks() {
                 }
             });
 
+            $(".enavd").each(function(i,elem) {
+                var linkHtml = $(this).html();
+                console.log(linkHtml);
+                //console.log(linkHtml);
+                var linkHtmlLink = linkHtml.substring(linkHtml.indexOf('"') + 1, linkHtml.lastIndexOf('"'));
+
+
+                var linkHtmlName = linkHtml.substring(linkHtml.indexOf(">") + 1, linkHtml.lastIndexOf("<"));
+                while (linkHtmlName.includes("&")) {
+                    console.log(linkHtmlName);
+                    if (linkHtmlName.includes("&#xE5;")) linkHtmlName = linkHtmlName.replace("&#xE5;", "å");
+                    if (linkHtmlName.includes("&#xC5;")) linkHtmlName = linkHtmlName.replace("&#xC5;", "Å");
+                    if (linkHtmlName.includes("&#xE4;")) linkHtmlName = linkHtmlName.replace("&#xE4;", "ä");
+                    if (linkHtmlName.includes("&#xC4;")) linkHtmlName = linkHtmlName.replace("&#xC4;", "Ä");
+                    if (linkHtmlName.includes("&#xF6;")) linkHtmlName = linkHtmlName.replace("&#xF6;", "ö");
+                    if (linkHtmlName.includes("&#xD6;")) linkHtmlName = linkHtmlName.replace("&#xD6;", "Ö");
+                    console.log(linkHtmlName);
+                }
+
+                if (linkHtmlLink.includes("SBF_SERIE_AVD")) {
+                    linkObjects.push({
+                        name: linkHtmlName,
+                        link: linkHtmlLink.slice(50, linkHtmlLink.indexOf("&"))
+                    });
+                }
+            });
+
+
+
             for (var i = 0; i < linkObjects.length; i++) {
-                linkObjects[i].link = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD"
-                    + linkObjects[i].link + "&k=LS"
-                    + linkObjects[i].link.substring(0,4) + "&p=1";
+                if (linkObjects[i].link.includes("X")) {
+                    console.log("contains x, stop!!");
+                    console.log(linkObjects[i]);
+                    while(true){
+
+                    }
+                } else {
+                    linkObjects[i].link = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD"
+                        + linkObjects[i].link + "&k=LS"
+                        + linkObjects[i].link + "&p=1";
+                }
+
             }
 
             /*for (var i = 0; i < linkObjects.length; i++) {
@@ -367,7 +426,10 @@ function doRequestGetLinks() {
             console.log("links below");
             console.log(links);*/
 
-            console.log(linkObjects)
+            console.log(linkObjects);
+
+            console.log("Correcting myself...");
+            linkObjects = correctLinks(linkObjects);
 
 
 
@@ -390,6 +452,23 @@ function doRequestGetLinks() {
             });
         }
     });
+}
+
+function correctLinks(linkArr) {
+    for (var i = 0; i < linkArr.length; i++) {
+        var html = syncrequest("GET", linkArr[i].link);
+        var $ = cheerio.load(html.getBody());
+
+        var divisionName = "";
+        $(".row h3").each(function(i,elem) {
+            divisionName = $(this).text();
+        });
+
+        console.log("Previous linkname was: " + linkArr[i].name);
+        linkArr[i].name = divisionName;
+        console.log("New linkname is: " + linkArr[i].name);
+    }
+    return linkArr;
 }
 
 function linkify(link, gameID) {
@@ -472,80 +551,136 @@ function objectify(row, gameID, gameLocation) {
             gameLocation: gameLocation
         };
     } else {
-        //console.log("Starting objectification...");
-        //console.log("input row: '" + row + "'");
+        if (row.includes(":")) {
+            //console.log("Row has ':' :'" + row + "'");
+            //console.log("Starting objectification...");
+            //console.log("input row: '" + row + "'");
 
-        var string = row;
-        string = string.replace("\n", "");
-        string = string.replace("\n", "");
-        string = string.replace("\n", "");
+            var string = row;
+            string = string.replace("\n", "");
+            string = string.replace("\n", "");
+            string = string.replace("\n", "");
 
-        //console.log("Cutting complete. New string: '" + string + "'");
+            //console.log("Cutting complete. New string: '" + string + "'");
 
-        string = string.replace(/\s*$/,"");
+            string = string.replace(/\s*$/,"");
 
-        //console.log("Removed whitespaces at end: '" + string + "'");
+            //console.log("Removed whitespaces at end: '" + string + "'");
 
-        var colonIndex = string.indexOf(":");
+            var colonIndex = string.indexOf(":");
 
-        var stringTimeHour = string.slice(colonIndex-2, colonIndex).trim();
-        var stringTimeMin = string.slice(colonIndex+1, colonIndex+3).trim();
+            var stringTimeHour = string.slice(colonIndex-2, colonIndex).trim();
+            var stringTimeMin = string.slice(colonIndex+1, colonIndex+3).trim();
 
-        //console.log("Hour: '" + stringTimeHour + "'");
-        //console.log("Min: '" + stringTimeMin + "'");
+            //console.log("Hour: '" + stringTimeHour + "'");
+            //console.log("Min: '" + stringTimeMin + "'");
 
-        var slashIndex = string.indexOf("/");
-        var stringDay = string.slice(slashIndex-2, slashIndex).trim();
-        var stringMonth = string.slice(slashIndex+1, slashIndex+3).trim();
+            var slashIndex = string.indexOf("/");
+            var stringDay = string.slice(slashIndex-2, slashIndex).trim();
+            var stringMonth = string.slice(slashIndex+1, slashIndex+3).trim();
 
-        //console.log("Day: '" + stringDay + "'");
-        //console.log("Month: '" + stringMonth + "'");
+            //console.log("Day: '" + stringDay + "'");
+            //console.log("Month: '" + stringMonth + "'");
 
-        var gameYear;
-        var dateNow = new Date();
+            var gameYear;
+            var dateNow = new Date();
 
-        if (Number(stringMonth) > 6) {
-            gameYear = dateNow.getFullYear();
+            if (Number(stringMonth) > 6) {
+                gameYear = dateNow.getFullYear();
+            } else {
+                gameYear = dateNow.getFullYear()+1;
+            }
+
+            var date = new Date(gameYear, Number(stringMonth)-1, Number(stringDay),
+                Number(stringTimeHour), Number(stringTimeMin));
+
+            //console.log(date.toDateString());
+
+            var dashIndex = string.indexOf(" - ");
+            //console.log("dash at: " + dashIndex);
+
+            var stringHomeTeam = string.slice(colonIndex+4, dashIndex);
+            var stringAwayTeam = string.slice(dashIndex+3, string.length);
+            //console.log("home: '" + stringHomeTeam + "'");
+            //console.log("away: '" + stringAwayTeam + "'");
+
+            return {
+                played: false,
+                date: date,
+                homeTeamName:stringHomeTeam,
+                awayTeamName:stringAwayTeam,
+                homeTeamScore:"-",
+                awayTeamScore:"-",
+                gameID: gameID,
+                gameLocation: gameLocation
+            };
         } else {
-            gameYear = dateNow.getFullYear()+1;
+            //console.log("Row has no ':' :'" + row + "'");
+
+            var string = row;
+            string = string.replace("\n", "");
+            string = string.replace("\n", "");
+            string = string.replace("\n", "");
+
+            //console.log("Cutting complete. New string: '" + string + "'");
+
+            string = string.replace(/\s*$/,"");
+
+            //console.log("Removed whitespaces at end: '" + string + "'");
+
+            var slashIndex = string.indexOf("/");
+            var stringDay = string.slice(slashIndex-2, slashIndex).trim();
+            var stringMonth = string.slice(slashIndex+1, slashIndex+3).trim();
+            //console.log("day: " + stringDay + ", month: " + stringMonth);
+
+            var dashIndex = string.indexOf(" - ");
+            var stringHomeTeam = string.slice(slashIndex+4, dashIndex);
+            var stringAwayTeam = string.slice(dashIndex+3, string.length);
+
+            //console.log("home: '" + stringHomeTeam + "'");
+            //console.log("away: '" + stringAwayTeam + "'");
+
+            var gameYear;
+            var dateNow = new Date();
+
+            if (Number(stringMonth) > 6) {
+                gameYear = dateNow.getFullYear();
+            } else {
+                gameYear = dateNow.getFullYear()+1;
+            }
+
+            var date = new Date(gameYear, Number(stringMonth)-1, Number(stringDay),
+                0, 0);
+
+            //console.log("date: " + date.toString());
+
+            return {
+                played: false,
+                date: date,
+                homeTeamName:stringHomeTeam,
+                awayTeamName:stringAwayTeam,
+                homeTeamScore:"-",
+                awayTeamScore:"-",
+                gameID: gameID,
+                gameLocation: gameLocation
+            };
         }
-
-        var date = new Date(gameYear, Number(stringMonth)-1, Number(stringDay),
-            Number(stringTimeHour), Number(stringTimeMin));
-
-        //console.log(date.toDateString());
-
-        var dashIndex = string.indexOf(" - ");
-        //console.log("dash at: " + dashIndex);
-
-        var stringHomeTeam = string.slice(colonIndex+4, dashIndex);
-        var stringAwayTeam = string.slice(dashIndex+3, string.length);
-        //console.log("home: '" + stringHomeTeam + "'");
-        //console.log("away: '" + stringAwayTeam + "'");
-
-        return {
-            played: false,
-            date: date,
-            homeTeamName:stringHomeTeam,
-            awayTeamName:stringAwayTeam,
-            homeTeamScore:"-",
-            awayTeamScore:"-",
-            gameID: gameID,
-            gameLocation: gameLocation
-        };
     }
 }
 
 var kskurl = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7931&k=LS7931&p=1";
 var eliturl = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD9753&k=LS9753&p=1";
 var dameliturlold = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7932&k=LS7932&p=1";
+var div1väst1819 = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD9778&k=LS9778&p=1";
 //testSyncReq();
 //newTestDoRequestUpdateGames(dameliturlold);
 //updateAllSeriesGameLocations();
 //doRequestUpdateGames("https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7916&k=LS7916&p=1");
-updateSeriesGameLocations("Herr Div 2 Sydväst");
-updateAllSeries2();
+//updateSeriesGameLocations("Division 1 Västra");
+updateAllSeriesGameLocations();
+//updateAllSeries2();
 //doRequestGetLinks();
+//removeCollections();
 //TESTupdateSeriesGameLocations("Elitserien Herr");
 /*setInterval(function() {
     var date = new Date();
