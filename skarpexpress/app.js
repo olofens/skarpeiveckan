@@ -166,6 +166,68 @@ function updateAllSeries() {
     });
 }
 
+function makeArena(arenaName) {
+    MongoClient.connect(mongourl, function(err, db) {
+        if (err) throw err;
+        var dbo = db.db("mydb");
+
+        dbo.collection("links").find({}).toArray(function(err, result) {
+            if (err) throw err;
+            db.close();
+            insertGamesInSeriesIntoArenaCollection(arenaName, result, 0, result.length);
+        });
+    });
+}
+
+function insertGamesInSeriesIntoArenaCollection(arenaName, linkList, currentIndex, maxIndex) {
+    if (currentIndex === maxIndex) return;
+    console.log("Looking in series: " + linkList[currentIndex].name);
+    MongoClient.connect(mongourl, function(err, db) {
+        if (err) throw err;
+        var dbo = db.db("mydb");
+
+        dbo.collection(linkList[currentIndex].name).find({gameLocation: arenaName}).toArray(function (err, res) {
+            console.log(res);
+
+            if (res.length > 0) {
+                var nUpdates = 0;
+                for (var i = 0; i < res.length; i++) {
+                    (function(tmp_id){
+                        dbo.collection(arenaName).updateOne({gameID: res[tmp_id].gameID},
+                            { $set: {
+                                    series:         linkList[currentIndex].name,
+                                    played:         res[tmp_id].played,
+                                    date:           res[tmp_id].date,
+                                    homeTeamName:   res[tmp_id].homeTeamName,
+                                    awayTeamName:   res[tmp_id].awayTeamName,
+                                    homeTeamScore:  res[tmp_id].homeTeamScore,
+                                    awayTeamScore:  res[tmp_id].awayTeamScore,
+                                    gameID:         res[tmp_id].gameID,
+                                    gameLocation:   res[tmp_id].gameLocation,
+                                    gameLink:       res[tmp_id].gameLink
+                                }
+                            },
+                            {upsert: true},
+                            function(err, result) {
+                                if (err) throw err;
+                                nUpdates++;
+                                if (nUpdates === res.length) {
+                                    db.close();
+                                    console.log("finished updating " + arenaName + " from series " + linkList[currentIndex].name);
+                                    console.log("restarting");
+                                    insertGamesInSeriesIntoArenaCollection(arenaName, linkList, currentIndex+1, maxIndex);
+                                }
+                            });
+                    })(i);
+                }
+            } else {
+                console.log("restarting");
+                insertGamesInSeriesIntoArenaCollection(arenaName, linkList, currentIndex+1, maxIndex);
+            }
+        });
+    });
+}
+
 function updateAllSeries2() {
     MongoClient.connect(mongourl, function(err, db) {
         if (err) throw err;
@@ -677,8 +739,9 @@ var div1väst1819 = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AV
 //updateAllSeriesGameLocations();
 //doRequestUpdateGames("https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7916&k=LS7916&p=1");
 //updateSeriesGameLocations("Division 1 Västra");
-updateAllSeriesGameLocations();
+//updateAllSeriesGameLocations();
 //updateAllSeries2();
+makeArena("Skarpe Nord");
 //doRequestGetLinks();
 //removeCollections();
 //TESTupdateSeriesGameLocations("Elitserien Herr");
