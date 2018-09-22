@@ -8,13 +8,15 @@ Creating a website with NodeJS backed up by a MongoDB database. I scrape match-d
 
 <del>Scrape all divisions. Sort into MongoDB properly. </del>
 
-Properly render game-tables so that it looks somewhat decent and all relevant data is shown.
+Implement ReactJS (and learn it for that matter).
 
-Include team pictures in tables. This requires all team logos from all divisions relevant to Skarpe Nord. This will probably require manual work. 
+Properly render game-tables so that it looks somewhat decent and all relevant data is shown. 
+
+Include team pictures in tables. This requires all team logos from all divisions relevant to Skarpe Nord. This will probably require manual work. Load these from imgur perhaps to reduce load on server? 
 
 Create a better week system. 
 
-Create system that tracks amount of visits
+Create system that tracks amount of visits to webpage. 
 
 Properly design the website. Crucial part. Make just as simple for mobile as desktop. 
 
