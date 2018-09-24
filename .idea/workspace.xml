@@ -19,14 +19,14 @@
     <session id="-1217278775">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="20" />
-          <entry key="project.open.time.10" value="1" />
+          <entry key="project.closed" value="22" />
+          <entry key="project.open.time.10" value="2" />
           <entry key="project.open.time.4" value="1" />
           <entry key="project.open.time.6" value="3" />
           <entry key="project.open.time.7" value="7" />
           <entry key="project.open.time.8" value="7" />
           <entry key="project.open.time.9" value="3" />
-          <entry key="project.opened" value="22" />
+          <entry key="project.opened" value="23" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
@@ -34,7 +34,7 @@
           <entry key="css" value="328" />
           <entry key="html" value="34" />
           <entry key="jade" value="1824" />
-          <entry key="js" value="27534" />
+          <entry key="js" value="27599" />
           <entry key="json" value="2" />
         </counts>
       </usages-collector>
@@ -44,7 +44,7 @@
           <entry key="HTML" value="34" />
           <entry key="JSON" value="2" />
           <entry key="Jade" value="1824" />
-          <entry key="JavaScript" value="27534" />
+          <entry key="JavaScript" value="27599" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -83,8 +83,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/skarpexpress/app.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1229">
-              <caret line="713" column="56" lean-forward="true" selection-start-line="713" selection-start-column="56" selection-end-line="713" selection-end-column="56" />
+            <state relative-caret-position="570">
+              <caret line="743" lean-forward="true" selection-start-line="743" selection-end-line="743" />
             </state>
           </provider>
         </entry>
@@ -221,7 +221,7 @@
       <path value="$PROJECT_DIR$/skarpexpress/package.json" />
     </packageJsonPaths>
   </component>
-  <component name="ProjectFrameBounds">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="-7" />
     <option name="width" value="907" />
     <option name="height" value="1047" />
@@ -231,6 +231,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -278,7 +279,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
       <pane id="PackagesPane" />
     </panes>
   </component>
@@ -426,17 +426,17 @@
       <workItem from="1536767832756" duration="18079000" />
       <workItem from="1536917307284" duration="11270000" />
       <workItem from="1536939431875" duration="1903000" />
+      <workItem from="1537647571884" duration="3236000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="175986000" />
+    <option name="totallyTimeSpent" value="179222000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="0" width="907" height="1047" extended-state="0" />
-    <editor active="true" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.28423476" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.13013698" />
       <window_info id="Structure" order="1" weight="0.25" />
       <window_info id="Nl-Palette" order="2" />
       <window_info id="Favorites" order="3" side_tool="true" />
@@ -493,8 +493,8 @@
     <entry file="file://$PROJECT_DIR$/skarpexpress/public/javascripts/games.json" />
     <entry file="file://$PROJECT_DIR$/skarpexpress/app.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1229">
-          <caret line="713" column="56" lean-forward="true" selection-start-line="713" selection-start-column="56" selection-end-line="713" selection-end-column="56" />
+        <state relative-caret-position="570">
+          <caret line="743" lean-forward="true" selection-start-line="743" selection-end-line="743" />
         </state>
       </provider>
     </entry>
