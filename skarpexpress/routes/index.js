@@ -19,8 +19,8 @@ router.get('/', function(req, res, next) {
       resultArray.push(doc);
     }, function() {
       db.close();
-      //res.render('index', {gamesjson: JSON.stringify(resultArray), games: resultArray});
-      res.send("index");
+      res.render('index', {gamesjson: JSON.stringify(resultArray), games: resultArray});
+      //res.send("index");
     });
   });
 });
