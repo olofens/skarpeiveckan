@@ -741,7 +741,7 @@ var div1väst1819 = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AV
 //updateSeriesGameLocations("Division 1 Västra");
 //updateAllSeriesGameLocations();
 //updateAllSeries2();
-makeArena("Skarpe Nord");
+//makeArena("Skarpe Nord");
 //doRequestGetLinks();
 //removeCollections();
 //TESTupdateSeriesGameLocations("Elitserien Herr");
@@ -753,4 +753,3 @@ makeArena("Skarpe Nord");
     }
 }, 1000);
 */
-
