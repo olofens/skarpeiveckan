@@ -20,6 +20,7 @@ router.get('/', function(req, res, next) {
     }, function() {
       db.close();
       res.render('index', {gamesjson: JSON.stringify(resultArray), games: resultArray});
+      // below for pure html
       //res.send("index");
     });
   });
