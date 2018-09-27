@@ -1,4 +1,9 @@
-const name = "Olof";
-const element = <h1>Hello, {name}</h1>;
-const domContainer2 = document.querySelector('#hello_world_wrapper');
-ReactDOM.render(element, domContainer);
+
+function Welcome(props) {
+  return <h1>Hello, {props.name}</h1>
+}
+
+const element = <Welcome name="Olle" />;
+
+ReactDOM.render(element, document.querySelector('#hello_world_wrapper'));
+console.log(gamedata);
