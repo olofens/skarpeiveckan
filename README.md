@@ -8,7 +8,7 @@ Creating a website with NodeJS backed up by a MongoDB database. I scrape match-d
 
 <del>Scrape all divisions. Sort into MongoDB properly. </del>
 
-Implement ReactJS (and learn it for that matter).
+<del>Implement ReactJS (and learn it for that matter).</del>
 
 Properly render game-tables so that it looks somewhat decent and all relevant data is shown. 
 
