@@ -4,6 +4,22 @@ function getCurrentWeek() {
     return getWeekNumber(nowDate);
 }
 
+var thisWeeksGameData = [];
+const selectedWeek = getCurrentWeek();
+
+function setThisWeeksGameData(week) {
+  thisWeeksGameData = [];
+  console.log("Checking for week: " + week + ", pushing!");
+  for (var i = 0; i < gamedata.length; i++) {
+    if (getWeekNumber(new Date(gamedata[i].date)) === week) {
+      thisWeeksGameData.push(gamedata[i]);
+      console.log("Pushed obj below: ");
+      console.log(gamedata[i]);
+    }
+  }
+  console.log(thisWeeksGameData);
+}
+
 function getWeekNumber(d) {
     // Copy date so don't modify original
     d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
@@ -23,7 +39,6 @@ function Welcome(props) {
 }
 
 function GameTable(props) {
-  console.log("comparing 49 to " + getWeekNumber(new Date(props.date)));
   if (49 === getWeekNumber(new Date(props.date))) {
     console.log(props.date);
     console.log("Date matched");
@@ -44,13 +59,15 @@ function GameTable(props) {
 }
 const element = <Welcome name="Olle" name2="Abbe" />;
 const gameElement = <GameTable homeTeamName = "ksk" awayTeamName = "ifk" />;
-
-const listItems = gamedata.map((gameobject) =>
-    <li key={gameobject.gameID.toString()}>
-      <GameTable homeTeamName = {gameobject.homeTeamName}
-                awayTeamName = {gameobject.awayTeamName}
-                date = {gameobject.date}  />
-    </li>);
+setThisWeeksGameData(2);
+const listItems = thisWeeksGameData.map((gameobject) =>
+      <li key={gameobject.gameID.toString()}>
+        <GameTable homeTeamName = {gameobject.homeTeamName}
+                  awayTeamName = {gameobject.awayTeamName}
+                  date = {gameobject.date}
+                  props = {gameobject.gameID.toString()}  />
+      </li>
+      );
 
 ReactDOM.render(element, document.querySelector('#gamearea'));
 ReactDOM.render(gameElement, document.querySelector("#gamearea"));
