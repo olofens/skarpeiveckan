@@ -1,41 +1,14 @@
 extends layout
 
-
-
-mixin makegames(game)
-  -
-  table.game
-    tr
-      td.teampic
-      td.teamname Hemmalag
-      td.teamscore
-      td.date= game.date.toLocaleDateString()
-      td.teamscore
-      td.teamname Bortalag
-      td.teampic
-    tr
-    tr
-      td.teampic bild
-      td.teamname= game.homeTeamName
-      td.teamscore= game.homeTeamScore
-      td.date#center -
-      td.teamscore= game.awayTeamScore
-      td.teamname= game.awayTeamName
-      td.teampic bild
-
 block content
 
   script(src="/javascripts/indexscript.js")
   script.
     var gamedata = !{gamesjson};
-  h1= title
-  p Welcome to #{title}
-  button(onclick="prevClick()") Förra veckan
-  #weeknr Vecka xx
-  script doFirstWeek()
-  button(onclick="nextClick()") Nästa vecka
+  table.buttons
+    tr
+      td#buttonPrev
+      td -
+      td#buttonNext
   div(id="gamearea")
-  ul#gamelist
-    each val in games
-      +makegames(val)
   

@@ -15,7 +15,7 @@ router.get('/', function(req, res, next) {
     var cursor = dbo.collection("Skarpe Nord").find();
     cursor.forEach(function(doc, err) {
       if (err) throw err;
-      console.log("hello");
+      //console.log("hello");
       resultArray.push(doc);
     }, function() {
       db.close();
