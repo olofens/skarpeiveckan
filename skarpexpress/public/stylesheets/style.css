@@ -18,6 +18,15 @@ a {
 
 }
 
+.centerdash {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.gameul {
+  list-style: none;
+}
+
 #center {
   alignment: center;
 }
