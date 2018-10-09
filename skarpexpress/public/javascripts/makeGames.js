@@ -18,6 +18,15 @@ function objectifyWeekGames(weekGames) {
       listOfGames[weekGames[i].date.getDay()].push(weekGames[i]);
     }
   }
+
+  console.log("Putting [0] -> [6]");
+  console.log("Before: " + listOfGames);
+  var temp = listOfGames[0];
+  for (var i = 0; i < listOfGames.length; i++) {
+    listOfGames[i] = listOfGames[i+1];
+  }
+  listOfGames[6] = temp;
+  console.log("After: " + listOfGames);
   return listOfGames;
 }
 
