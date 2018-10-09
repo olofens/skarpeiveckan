@@ -2,6 +2,13 @@ function updateDates() {
   for (var i = 0; i < gamedata.length; i++) {
     gamedata[i].date = new Date(gamedata[i].date);
   }
+  gamedata.sort(function(a,b) {
+    if (a.date < b.date) return -1;
+    else if (a.date > b.date) return 1;
+    else return 0;
+  });
+  console.log("Sorting done!");
+  console.log(gamedata);
 }
 updateDates();
 
