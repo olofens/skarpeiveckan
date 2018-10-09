@@ -1,3 +1,5 @@
+const dayArrayString = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
 function updateDates() {
   for (var i = 0; i < gamedata.length; i++) {
     gamedata[i].date = new Date(gamedata[i].date);
@@ -58,6 +60,21 @@ function getWeekNumber(d) {
 
 function changeShowedGames(newWeek) {
   setThisWeeksGameData(newWeek);
+  var listOfGames = objectifyWeekGames(thisWeeksGameData);
+  for (var i = 0; i < listOfGames.length; i++) {
+    if (listOfGames[i] !== undefined) {
+      console.log(dayArrayString[i] + " games are: ");
+      for (var j = 0; j < listOfGames[i].length; j++) {
+        console.log(listOfGames[i][j]);
+      }
+    }
+  }
+
+
+
+
+
+
   const listItemsDynamic = thisWeeksGameData.map((gameobject) =>
         <li key={gameobject.gameID.toString()}>
           <GameTable homeTeamName = {gameobject.homeTeamName}
