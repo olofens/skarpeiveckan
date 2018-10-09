@@ -1,3 +1,21 @@
+function updateDates() {
+  console.log("Starting date updating...");
+  for (var i = 0; i < gamedata.length; i++) {
+    console.log("Updating this date: " + gamedata[i].date);
+    gamedata[i].date = new Date(gamedata[i].date);
+    console.log("New date after update: " + gamedata[i].date);
+  }
+}
+
+updateDates();
+
+function objectifyWeekGames(weekGames) {
+  for (var i = 0; i < weekGames.length; i++) {
+    if (weekGames[i].date)
+    ;
+  }
+}
+
 function getCurrentWeek() {
     var nowDate = new Date();
     return getWeekNumber(nowDate);
@@ -23,8 +41,7 @@ function changeShowedGames(newWeek) {
         <li key={gameobject.gameID.toString()}>
           <GameTable homeTeamName = {gameobject.homeTeamName}
                     awayTeamName = {gameobject.awayTeamName}
-                    time = {(new Date(gameobject.date)).
-                      toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    time = {gameobject.date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                     props = {gameobject.gameID.toString()} />
         </li>
     );
@@ -38,7 +55,7 @@ function setThisWeeksGameData(week) {
   thisWeeksGameData = [];
   console.log("Checking for week: " + week + ", pushing!");
   for (var i = 0; i < gamedata.length; i++) {
-    if (getWeekNumber(new Date(gamedata[i].date)) === week) {
+    if (getWeekNumber(gamedata[i].date) === week) {
       thisWeeksGameData.push(gamedata[i]);
       console.log("Pushed obj below: ");
       console.log(gamedata[i]);
@@ -86,8 +103,7 @@ const buttonPrev = <button onClick={prevButtonClicked}> Föregående vecka </but
 
 ReactDOM.render(buttonNext, document.querySelector("#buttonNext"));
 ReactDOM.render(buttonPrev, document.querySelector("#buttonPrev"));
-//ReactDOM.render(element, document.querySelector('#gamearea'));
-//ReactDOM.render(gameElement, document.querySelector("#gamearea"));
-//ReactDOM.render(<ul class="gamelistobject">{listItems}</ul>, document.querySelector("#gamearea"));
+
 console.log(gamedata);
 console.log(getCurrentWeek());
+updateDates();
