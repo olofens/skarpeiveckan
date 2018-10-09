@@ -1,19 +1,24 @@
 function updateDates() {
-  console.log("Starting date updating...");
   for (var i = 0; i < gamedata.length; i++) {
-    console.log("Updating this date: " + gamedata[i].date);
     gamedata[i].date = new Date(gamedata[i].date);
-    console.log("New date after update: " + gamedata[i].date);
   }
 }
-
 updateDates();
 
 function objectifyWeekGames(weekGames) {
+  var listOfGames = [];
+  console.log("objectification started...");
   for (var i = 0; i < weekGames.length; i++) {
-    if (weekGames[i].date)
-    ;
+    console.log("Going into check");
+    if (listOfGames[weekGames[i].date.getDay()] === undefined) {
+      console.log("listOfGames[" + i + "] is null, adding: " + [weekGames[i]]);
+      listOfGames[weekGames[i].date.getDay()] = [weekGames[i]];
+    } else {
+      console.log("listOfGames[" + i + "] is not null, pushing: " + [weekGames[i]]);
+      listOfGames[weekGames[i].date.getDay()].push(weekGames[i]);
+    }
   }
+  return listOfGames;
 }
 
 function getCurrentWeek() {
@@ -62,6 +67,7 @@ function setThisWeeksGameData(week) {
     }
   }
   console.log(thisWeeksGameData);
+  console.log(objectifyWeekGames(thisWeeksGameData));
 }
 
 function nextButtonClicked() {
@@ -106,4 +112,4 @@ ReactDOM.render(buttonPrev, document.querySelector("#buttonPrev"));
 
 console.log(gamedata);
 console.log(getCurrentWeek());
-updateDates();
+console.log(objectifyWeekGames(thisWeeksGameData));
