@@ -55,6 +55,23 @@ app.use(function(err, req, res, next) {
 
 module.exports = app;
 
+/*
+    Vad är det som inte fungerar ännu? Jo jag minns inte... borde dokumenterat vad som behöver göras för att automatisera hela processen felfritt!
+
+    Hur ska det fungera? Jo, databasen ska uppdateras kontinuerligt. Den består av:
+        - En kollektion 'links' med länkar till alla serier. Ser ut såhär: 
+            - name
+            - link
+            ~~~~~~~~~~~~~~~~
+            Denna behöver uppdateras då och då. Antagligen inte så mycket under säsongen eftersom att alla serier är lagda.
+            De ändringar som sker är om cuper läggs upp och om fortsättningsserier läggs upp. Detta är bara tillägg. De länkar som redan finns
+            borde rimligen inte ändras. 
+        
+        - En kollektion för varje serie. Härstammar från links. Innehåller alla matcher i serien. 
+        - En kollektion för Skarpe Nord. 
+*/
+
+
 var mongourl = "mongodb://localhost:27017/";
 var url = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7931&k=LS7931&p=1";
 
@@ -305,7 +322,9 @@ function doRequestUpdateGames2(linkList, currentIndex, maxIndex) {
 
     var gameObjects = [];
     for (var i = 0; i < gameRows.length; i++) {
-        gameObjects.push(objectify((gameRows[i][0]), gameRows[i][1], gameRows[i][2]));
+        var temp = objectify((gameRows[i][0]), gameRows[i][1], gameRows[i][2]);
+        if (temp === null) console.log("received null, not inserting this...");
+        else gameObjects.push(temp);
     }
 
     gameObjects.sort(function(a,b) {
@@ -552,7 +571,7 @@ function linkify(link, gameID) {
 
 function objectify(row, gameID, gameLocation) {
     if (row.includes("Detaljer")) {
-        //console.log(row);
+        console.log(row);
         var string = row;
         string = string.replace("\n", "");
         string = string.replace("\n", "");
@@ -619,35 +638,35 @@ function objectify(row, gameID, gameLocation) {
         };
     } else {
         if (row.includes(":")) {
-            //console.log("Row has ':' :'" + row + "'");
-            //console.log("Starting objectification...");
-            //console.log("input row: '" + row + "'");
+            console.log("Row has ':' :'" + row + "'");
+            console.log("Starting objectification...");
+            console.log("input row: '" + row + "'");
 
             var string = row;
             string = string.replace("\n", "");
             string = string.replace("\n", "");
             string = string.replace("\n", "");
 
-            //console.log("Cutting complete. New string: '" + string + "'");
+            console.log("Cutting complete. New string: '" + string + "'");
 
             string = string.replace(/\s*$/,"");
 
-            //console.log("Removed whitespaces at end: '" + string + "'");
+            console.log("Removed whitespaces at end: '" + string + "'");
 
             var colonIndex = string.indexOf(":");
 
             var stringTimeHour = string.slice(colonIndex-2, colonIndex).trim();
             var stringTimeMin = string.slice(colonIndex+1, colonIndex+3).trim();
 
-            //console.log("Hour: '" + stringTimeHour + "'");
-            //console.log("Min: '" + stringTimeMin + "'");
+            console.log("Hour: '" + stringTimeHour + "'");
+            console.log("Min: '" + stringTimeMin + "'");
 
             var slashIndex = string.indexOf("/");
             var stringDay = string.slice(slashIndex-2, slashIndex).trim();
             var stringMonth = string.slice(slashIndex+1, slashIndex+3).trim();
 
-            //console.log("Day: '" + stringDay + "'");
-            //console.log("Month: '" + stringMonth + "'");
+            console.log("Day: '" + stringDay + "'");
+            console.log("Month: '" + stringMonth + "'");
 
             var gameYear;
             var dateNow = new Date();
@@ -661,15 +680,15 @@ function objectify(row, gameID, gameLocation) {
             var date = new Date(gameYear, Number(stringMonth)-1, Number(stringDay),
                 Number(stringTimeHour), Number(stringTimeMin));
 
-            //console.log(date.toDateString());
+            console.log(date.toDateString());
 
             var dashIndex = string.indexOf(" - ");
-            //console.log("dash at: " + dashIndex);
+            console.log("dash at: " + dashIndex);
 
             var stringHomeTeam = string.slice(colonIndex+4, dashIndex);
             var stringAwayTeam = string.slice(dashIndex+3, string.length);
-            //console.log("home: '" + stringHomeTeam + "'");
-            //console.log("away: '" + stringAwayTeam + "'");
+            console.log("home: '" + stringHomeTeam + "'");
+            console.log("away: '" + stringAwayTeam + "'");
 
             return {
                 played: false,
@@ -681,31 +700,31 @@ function objectify(row, gameID, gameLocation) {
                 gameID: gameID,
                 gameLocation: gameLocation
             };
-        } else {
-            //console.log("Row has no ':' :'" + row + "'");
+        } else if (containsDayString(row)) {
+            console.log("Row has no ':' :'" + row + "'");
 
             var string = row;
             string = string.replace("\n", "");
             string = string.replace("\n", "");
             string = string.replace("\n", "");
 
-            //console.log("Cutting complete. New string: '" + string + "'");
+            console.log("Cutting complete. New string: '" + string + "'");
 
             string = string.replace(/\s*$/,"");
 
-            //console.log("Removed whitespaces at end: '" + string + "'");
+            console.log("Removed whitespaces at end: '" + string + "'");
 
             var slashIndex = string.indexOf("/");
             var stringDay = string.slice(slashIndex-2, slashIndex).trim();
             var stringMonth = string.slice(slashIndex+1, slashIndex+3).trim();
-            //console.log("day: " + stringDay + ", month: " + stringMonth);
+            console.log("day: " + stringDay + ", month: " + stringMonth);
 
             var dashIndex = string.indexOf(" - ");
             var stringHomeTeam = string.slice(slashIndex+4, dashIndex);
             var stringAwayTeam = string.slice(dashIndex+3, string.length);
 
-            //console.log("home: '" + stringHomeTeam + "'");
-            //console.log("away: '" + stringAwayTeam + "'");
+            console.log("home: '" + stringHomeTeam + "'");
+            console.log("away: '" + stringAwayTeam + "'");
 
             var gameYear;
             var dateNow = new Date();
@@ -719,7 +738,7 @@ function objectify(row, gameID, gameLocation) {
             var date = new Date(gameYear, Number(stringMonth)-1, Number(stringDay),
                 0, 0);
 
-            //console.log("date: " + date.toString());
+            console.log("date: " + date.toString());
 
             return {
                 played: false,
@@ -731,14 +750,69 @@ function objectify(row, gameID, gameLocation) {
                 gameID: gameID,
                 gameLocation: gameLocation
             };
+        } else {
+            // Row does not contain any date, and game has not been played. So only, for example: "IFK Kungälv - Kareby IS"
+            // Let's just ignore these games...
+            console.log("Game found that is to be ignored!" + row);
+            return null;
         }
     }
 }
+
+function containsDayString(str) {
+    if (str.includes("Mån ") || str.includes("Tis ") || str.includes("Ons ")
+    || str.includes("Tor ") || str.includes("Fre ") || str.includes("Lör ") || str.includes("Sön ")) {
+        return true;
+    } else return false;
+}
+
+// start database refreshing at a specific time. don't let the function be called twice via runningDone variable and 30.000s timer set
+function startBackend() {
+    var runningDone = false;
+    setInterval(function() {
+        var date = new Date();
+        if (date.getHours() === 17 && date.getMinutes() === 34 && !runningDone) {
+            refreshDatabase();
+            runningDone = true;
+        } else {
+            runningDone = false;
+        }
+    }, 30000);
+}
+
+function refreshDatabase() {
+    /*
+        The functions we have to work with are: 
+            - doRequestGetLinks
+            - updateAllSeries2
+            - updateAllSeriesGameLocations
+            - makeArena
+    */
+
+    console.log("Starting database refresh...");
+    console.log("Removing collections...");
+    removeCollections();
+    console.log("Collections removed. Updating links...");
+    doRequestGetLinks();
+    console.log("Links updated. Getting all series...");
+    updateAllSeries2();
+    console.log("All series gathered. Now getting game locations...");
+    updateAllSeriesGameLocations();
+    console.log("All game locations updated... making arena...");
+    makeArena('Skarpe Nord');
+    console.log("Arena-making done! Database update done!")
+}
+
+startBackend();
 
 var kskurl = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7931&k=LS7931&p=1";
 var eliturl = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD9753&k=LS9753&p=1";
 var dameliturlold = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7932&k=LS7932&p=1";
 var div1väst1819 = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD9778&k=LS9778&p=1";
+
+//var arr = [{link: "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD10288&k=LS10288&p=1"}];
+//doRequestUpdateGames2(arr, 0, 1);
+
 //testSyncReq();
 //newTestDoRequestUpdateGames(dameliturlold);
 //updateAllSeriesGameLocations();
@@ -758,3 +832,14 @@ var div1väst1819 = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AV
     }
 }, 1000);
 */
+
+/*
+ When recreating the database, which is necessary at this moment in time, run: 
+    removecollections, 
+    dorequestgetlinks, 
+    updateallseries2,
+    updateallseriesgamelocations,
+    makearena(skarpe).
+
+*/
+
