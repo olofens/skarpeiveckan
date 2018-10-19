@@ -72,25 +72,26 @@ module.exports = app;
 */
 
 
-var mongourl = "cluster0-shard-00-01-zdx0o.mongodb.net:27017";
+var mongourl = "mongodb+srv://user1:pass1234PASS@cluster0-zdx0o.mongodb.net/test?retryWrites=true";
+console.log("mongo url is: " + mongourl);
 var url = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7931&k=LS7931&p=1";
 
-function updateAllSeriesGameLocations() {
+function updateAllSeriesGameLocations(callback) {
     MongoClient.connect(mongourl, function(err, db) {
         if (err) throw err;
         var dbo = db.db("mydb");
 
         dbo.collection("links").find({}).toArray(function(err, res) {
             db.close();
-            updateSeriesGameLocations(res, 0, res.length);
+            updateSeriesGameLocations(res, 0, res.length, callback);
         });
     });
 }
 
 
 
-function updateSeriesGameLocations(linkList, currentIndex, maxIndex) {
-    if (currentIndex === maxIndex) return;
+function updateSeriesGameLocations(linkList, currentIndex, maxIndex, callback) {
+    if (currentIndex === maxIndex) return callback();
     var series = linkList[currentIndex].name;
     console.log("Updating locations for series: " + series);
 
@@ -160,7 +161,7 @@ function updateSeriesGameLocations(linkList, currentIndex, maxIndex) {
                         if (dbUpdates === res.length) {
                             db.close();
                             console.log("restarting");
-                            return updateSeriesGameLocations(linkList, currentIndex+1, maxIndex);
+                            updateSeriesGameLocations(linkList, currentIndex+1, maxIndex, callback);
                         }
                     }
                 );
@@ -188,7 +189,7 @@ function updateAllSeries() {
     });
 }
 
-function makeArena(arenaName) {
+function makeArena(arenaName, callback) {
     MongoClient.connect(mongourl, function(err, db) {
         if (err) throw err;
         var dbo = db.db("mydb");
@@ -196,13 +197,14 @@ function makeArena(arenaName) {
         dbo.collection("links").find({}).toArray(function(err, result) {
             if (err) throw err;
             db.close();
-            insertGamesInSeriesIntoArenaCollection(arenaName, result, 0, result.length);
+            insertGamesInSeriesIntoArenaCollection(arenaName, result, 0, result.length, callback);
+            
         });
     });
 }
 
-function insertGamesInSeriesIntoArenaCollection(arenaName, linkList, currentIndex, maxIndex) {
-    if (currentIndex === maxIndex) return;
+function insertGamesInSeriesIntoArenaCollection(arenaName, linkList, currentIndex, maxIndex, callback) {
+    if (currentIndex === maxIndex) return callback();
     console.log("Looking in series: " + linkList[currentIndex].name);
     MongoClient.connect(mongourl, function(err, db) {
         if (err) throw err;
@@ -237,20 +239,20 @@ function insertGamesInSeriesIntoArenaCollection(arenaName, linkList, currentInde
                                     db.close();
                                     console.log("finished updating " + arenaName + " from series " + linkList[currentIndex].name);
                                     console.log("restarting");
-                                    insertGamesInSeriesIntoArenaCollection(arenaName, linkList, currentIndex+1, maxIndex);
+                                    insertGamesInSeriesIntoArenaCollection(arenaName, linkList, currentIndex+1, maxIndex, callback);
                                 }
                             });
                     })(i);
                 }
             } else {
                 console.log("restarting");
-                insertGamesInSeriesIntoArenaCollection(arenaName, linkList, currentIndex+1, maxIndex);
+                insertGamesInSeriesIntoArenaCollection(arenaName, linkList, currentIndex+1, maxIndex, callback);
             }
         });
     });
 }
 
-function updateAllSeries2() {
+function updateAllSeries2(callback) {
     MongoClient.connect(mongourl, function(err, db) {
         if (err) throw err;
         var dbo = db.db("mydb");
@@ -258,14 +260,15 @@ function updateAllSeries2() {
         dbo.collection("links").find({}).toArray(function(err, result) {
             if (err) throw err;
             db.close();
-            doRequestUpdateGames2(result, 0, result.length);
+            doRequestUpdateGames2(result, 0, result.length, callback);
+            
         });
     });
 }
 
-function doRequestUpdateGames2(linkList, currentIndex, maxIndex) {
+function doRequestUpdateGames2(linkList, currentIndex, maxIndex, callback) {
 
-    if (currentIndex === maxIndex) return;
+    if (currentIndex === maxIndex) return callback();
     var seriesurl = linkList[currentIndex].link;
     var html = syncrequest("GET", seriesurl);
     var $ = cheerio.load(html.getBody());
@@ -388,7 +391,7 @@ function doRequestUpdateGames2(linkList, currentIndex, maxIndex) {
                                 //console.log("now at i = " + i + ", closing db.");
                                 db.close();
                                 console.log("finished updating " + divisionName);
-                                doRequestUpdateGames2(linkList, currentIndex+1, maxIndex);
+                                doRequestUpdateGames2(linkList, currentIndex+1, maxIndex, callback);
                             }
                         });
                 })(i);
@@ -397,31 +400,39 @@ function doRequestUpdateGames2(linkList, currentIndex, maxIndex) {
     });
 }
 
-function removeCollections() {
+function removeCollections(callback) {
     MongoClient.connect(mongourl, function(err, db) {
         if (err) throw err;
         var dbo = db.db("mydb");
 
         dbo.collections(function (err, collections) {
             for (var i = 0; i < collections.length; i++) {
-                (function(tmp_id) {
+                if (collections.length === 1) {
+                    callback();
+                } else {
+                    (function(tmp_id) {
                     if(collections[tmp_id].collectionName !== "links") {
                         dbo.collection(collections[tmp_id].collectionName).drop(function(err, delOK) {
                             if (err) throw err;
                             if (delOK) console.log(collections[tmp_id].collectionName + " deleted.")
+
+                            if (tmp_id === collections.length-1) {
+                                console.log("removecollections callback entered!");
+                                callback();
+                            }
                         });
                     }
                 })(i);
+                }
+            
             }
 
             console.log(collections[0].collectionName);
         });
-
-
     });
 }
 
-function doRequestGetLinks() {
+function doRequestGetLinks(callback) {
     var links = [];
     var url2 = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD9753&k=LS9753&p=1";
     request(url2, function(err, resp, html) {
@@ -534,6 +545,7 @@ function doRequestGetLinks() {
                 dbo.collection("links").insertMany(linkObjects, function(err, res) {
                     if (err) throw err;
                     console.log("Number of documents inserted: " + res.insertedCount);
+                    callback();
                 });
             });
         }
@@ -769,9 +781,10 @@ function containsDayString(str) {
 // start database refreshing at a specific time. don't let the function be called twice via runningDone variable and 30.000s timer set
 function startBackend() {
     var runningDone = false;
+    refreshDatabase2();
     setInterval(function() {
         var date = new Date();
-        if (date.getHours() === 17 && date.getMinutes() === 34 && !runningDone) {
+        if (date.getHours() === 2 && date.getMinutes() === 0 && !runningDone) {
             refreshDatabase();
             runningDone = true;
         } else {
@@ -791,16 +804,21 @@ function refreshDatabase() {
 
     console.log("Starting database refresh...");
     console.log("Removing collections...");
-    removeCollections();
-    console.log("Collections removed. Updating links...");
-    doRequestGetLinks();
-    console.log("Links updated. Getting all series...");
-    updateAllSeries2();
-    console.log("All series gathered. Now getting game locations...");
-    updateAllSeriesGameLocations();
-    console.log("All game locations updated... making arena...");
-    makeArena('Skarpe Nord');
-    console.log("Arena-making done! Database update done!")
+    removeCollections(function() {
+        console.log("Collections removed. Updating links...");
+        doRequestGetLinks(function() {
+            console.log("Links updated. Getting all series...");
+            updateAllSeries2(function() {
+                console.log("All series gathered. Now getting game locations...");
+                updateAllSeriesGameLocations(function() {
+                    console.log("All game locations updated... making arena...");
+                    makeArena('Skarpe Nord', function() {
+                        console.log("Arena-making done! Database update done!")
+                    });
+                });
+            });
+        });
+    });
 }
 
 startBackend();
