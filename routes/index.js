@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var MongoClient = require("mongodb").MongoClient;
 
-var mongourl = "mongodb://localhost:27017/";
+var mongourl = "mongodb+srv://user1:pass1234PASS@cluster0-zdx0o.mongodb.net/test?retryWrites=true";
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
