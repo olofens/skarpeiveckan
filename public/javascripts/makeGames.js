@@ -1,4 +1,4 @@
-const dayArrayString = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const dayArrayString = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag", "Söndag"];
 
 function updateDates() {
   for (var i = 0; i < gamedata.length; i++) {
@@ -60,6 +60,9 @@ function getWeekNumber(d) {
 
 function changeShowedGames(newWeek) {
   setThisWeeksGameData(newWeek);
+
+  clearAllGames();
+
   var listOfGames = objectifyWeekGames(thisWeeksGameData);
   for (var i = 0; i < listOfGames.length; i++) {
     if (listOfGames[i] !== undefined) {
@@ -70,12 +73,12 @@ function changeShowedGames(newWeek) {
     }
   }
 
+  for (var i = 0; i < listOfGames.length; i++) {
+    document.getElementById(dayArrayString[i].toString() + "Top").style.display = "";
+    if (listOfGames[i] !== undefined) {
 
-
-
-
-
-  const listItemsDynamic = thisWeeksGameData.map((gameobject) =>
+      var listItemsDynamic = [];
+      listItemsDynamic = listOfGames[i].map((gameobject) =>
         <li key={gameobject.gameID.toString()}>
           <GameTable homeTeamName = {gameobject.homeTeamName}
                     awayTeamName = {gameobject.awayTeamName}
@@ -83,7 +86,12 @@ function changeShowedGames(newWeek) {
                     props = {gameobject.gameID.toString()} />
         </li>
     );
-    ReactDOM.render(<ul class="gameul">{listItemsDynamic}</ul>, document.querySelector("#gamearea"));
+    ReactDOM.render(<ul class="gameul">{listItemsDynamic}</ul>, document.querySelector("#" + dayArrayString[i].toString() + "Games"));
+    } else {
+      document.getElementById(dayArrayString[i].toString() + "Top").style.display = "none";
+    }
+  }
+  ReactDOM.render(<p>v{newWeek}</p>, document.querySelector("#weekText"));
 }
 
 var thisWeeksGameData = [];
@@ -117,6 +125,12 @@ function Welcome(props) {
   return <h1>Hello, {props.name} {props.name2}</h1>
 }
 
+function clearAllGames() {
+  for (var i = 0; i < dayArrayString.length; i++) {
+    ReactDOM.render(<p> </p>, document.querySelector("#" + dayArrayString[i].toString() + "Games"));
+  }
+}
+
 function GameTable(props) {
     return (
       <table class="game">
@@ -137,8 +151,8 @@ function GameTable(props) {
 }
 
 changeShowedGames(getCurrentWeek());
-const buttonNext = <button onClick={nextButtonClicked}> Nästa vecka </button>
-const buttonPrev = <button onClick={prevButtonClicked}> Föregående vecka </button>
+const buttonNext = <button onClick={nextButtonClicked}> Nästa </button>
+const buttonPrev = <button onClick={prevButtonClicked}> Förra </button>
 
 ReactDOM.render(buttonNext, document.querySelector("#buttonNext"));
 ReactDOM.render(buttonPrev, document.querySelector("#buttonPrev"));
