@@ -781,7 +781,6 @@ function containsDayString(str) {
 // start database refreshing at a specific time. don't let the function be called twice via runningDone variable and 30.000s timer set
 function startBackend() {
     var runningDone = false;
-    refreshDatabase2();
     setInterval(function() {
         var date = new Date();
         if (date.getHours() === 2 && date.getMinutes() === 0 && !runningDone) {
