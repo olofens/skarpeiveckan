@@ -822,6 +822,12 @@ function refreshDatabase() {
 
 startBackend();
 
+// ping myself every 5 minutes to make sure website doesnt sleep (heroku)
+var http = require("http");
+setInterval(function() {
+    http.get("http://skarpetest.herokuapp.com");
+}, 300000); // every 5 minutes (300000)
+
 var kskurl = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7931&k=LS7931&p=1";
 var eliturl = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD9753&k=LS9753&p=1";
 var dameliturlold = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7932&k=LS7932&p=1";
