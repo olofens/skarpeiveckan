@@ -76,97 +76,85 @@ var mongourl = "mongodb+srv://user1:pass1234PASS@cluster0-zdx0o.mongodb.net/test
 console.log("mongo url is: " + mongourl);
 var url = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7931&k=LS7931&p=1";
 
-function updateAllSeriesGameLocations(callback) {
-    MongoClient.connect(mongourl, function(err, db) {
-        if (err) throw err;
-        var dbo = db.db("mydb");
-
-        dbo.collection("links").find({}).toArray(function(err, res) {
-            db.close();
-            updateSeriesGameLocations(res, 0, res.length, callback);
-        });
+function updateAllSeriesGameLocations(dbo, callback) {
+    dbo.collection("links").find({}).toArray(function(err, res) {
+        updateSeriesGameLocations(dbo, res, 0, res.length, callback);
     });
 }
 
 
 
-function updateSeriesGameLocations(linkList, currentIndex, maxIndex, callback) {
+function updateSeriesGameLocations(dbo, linkList, currentIndex, maxIndex, callback) {
     if (currentIndex === maxIndex) return callback();
     var series = linkList[currentIndex].name;
     console.log("Updating locations for series: " + series);
 
-    MongoClient.connect(mongourl, function(err, db) {
+    dbo.collection(series).find({}).toArray(function(err, res) {
         if (err) throw err;
-        var dbo = db.db("mydb");
-
-        dbo.collection(series).find({}).toArray(function(err, res) {
-            if (err) throw err;
-            var foundString;
-            var gamePlace;
-            var dbUpdates = 0;
-            var times = 0;
-            for (var i = 0; i < res.length; i++) {
-                times++;
-                console.log("sending request: " + i);
-                var requestResult = syncrequest("GET", res[i].gameLink);
-                console.log("request returned: " + i);
-                var html = requestResult.getBody();
+        var foundString;
+        var gamePlace;
+        var dbUpdates = 0;
+        var times = 0;
+        for (var i = 0; i < res.length; i++) {
+            times++;
+            console.log("sending request: " + i);
+            var requestResult = syncrequest("GET", res[i].gameLink);
+            console.log("request returned: " + i);
+            var html = requestResult.getBody();
 
 
-                var $ = cheerio.load(html);
+            var $ = cheerio.load(html);
 
-                var onclickArray = [];
+            var onclickArray = [];
 
-                $(".row tr").each(function(i2,elem) {
+            $(".row tr").each(function(i2,elem) {
 
-                    onclickArray.push($(this).text());
-                    //console.log(i2 + " text: " + $(this).text());
+                onclickArray.push($(this).text());
+                //console.log(i2 + " text: " + $(this).text());
 
-                    if ($(this).text().includes("Spelplats") ) {
-                        //console.log("found at " + i2);
+                if ($(this).text().includes("Spelplats") ) {
+                    //console.log("found at " + i2);
 
-                        var string = $(this).text();
-                        gamePlace = string.replace("Spelplats", "");
-                        console.log(gamePlace);
-                        for (var j = i2; j > 0; j--) {
-                            if (onclickArray[j].includes(" - ")) {
-                                console.log("found string.........");
-                                foundString = onclickArray[j];
-                                j = 0;
-                            }
+                    var string = $(this).text();
+                    gamePlace = string.replace("Spelplats", "");
+                    console.log(gamePlace);
+                    for (var j = i2; j > 0; j--) {
+                        if (onclickArray[j].includes(" - ")) {
+                            console.log("found string.........");
+                            foundString = onclickArray[j];
+                            j = 0;
                         }
                     }
-                });
+                }
+            });
 
-                console.log("found string: " + foundString);
-                var foundObject = objectify(foundString, "", gamePlace);
-                //console.log("a foundobject: " + foundObject.date + ", " + foundObject.homeTeamName + " - " + foundObject.awayTeamName);
-                //console.log(foundObject);
-                dbo.collection(series).updateOne(
-                    {   date: foundObject.date,
-                        homeTeamName: foundObject.homeTeamName,
-                        awayTeamName: foundObject.awayTeamName
-                    },
-                    {$set: { gameLocation: foundObject.gameLocation }
-                    },
-                    function(err, result) {
-                        console.log("reslength: " + res.length);
-                        if (err) {
-                            console.log("error here bud");
-                            throw err;
-                        }
-                        console.log(result.result.nModified + " documents updated");
-                        dbUpdates++;
-                        console.log("dbupdates: " + dbUpdates);
-                        if (dbUpdates === res.length) {
-                            db.close();
-                            console.log("restarting");
-                            updateSeriesGameLocations(linkList, currentIndex+1, maxIndex, callback);
-                        }
+            console.log("found string: " + foundString);
+            var foundObject = objectify(foundString, "", gamePlace);
+            //console.log("a foundobject: " + foundObject.date + ", " + foundObject.homeTeamName + " - " + foundObject.awayTeamName);
+            //console.log(foundObject);
+            dbo.collection(series).updateOne(
+                {   date: foundObject.date,
+                    homeTeamName: foundObject.homeTeamName,
+                    awayTeamName: foundObject.awayTeamName
+                },
+                {$set: { gameLocation: foundObject.gameLocation }
+                },
+                function(err, result) {
+                    console.log("reslength: " + res.length);
+                    if (err) {
+                        console.log("error here bud");
+                        throw err;
                     }
-                );
-            }
-        });
+                    console.log(result.result.nModified + " documents updated");
+                    dbUpdates++;
+                    console.log("dbupdates: " + dbUpdates);
+                    if (dbUpdates === res.length) {
+                        console.log("restarting");
+                        updateSeriesGameLocations(dbo, linkList, currentIndex+1, maxIndex, callback);
+                    }
+                }
+            );
+        }
     });
 }
 
@@ -189,84 +177,65 @@ function updateAllSeries() {
     });
 }
 
-function makeArena(arenaName, callback) {
-    MongoClient.connect(mongourl, function(err, db) {
+function makeArena(dbo, arenaName, callback) {
+    dbo.collection("links").find({}).toArray(function(err, result) {
         if (err) throw err;
-        var dbo = db.db("mydb");
-
-        dbo.collection("links").find({}).toArray(function(err, result) {
-            if (err) throw err;
-            db.close();
-            insertGamesInSeriesIntoArenaCollection(arenaName, result, 0, result.length, callback);
-            
-        });
+        insertGamesInSeriesIntoArenaCollection(dbo, arenaName, result, 0, result.length, callback);
+        
     });
 }
 
-function insertGamesInSeriesIntoArenaCollection(arenaName, linkList, currentIndex, maxIndex, callback) {
+function insertGamesInSeriesIntoArenaCollection(dbo, arenaName, linkList, currentIndex, maxIndex, callback) {
     if (currentIndex === maxIndex) return callback();
     console.log("Looking in series: " + linkList[currentIndex].name);
-    MongoClient.connect(mongourl, function(err, db) {
-        if (err) throw err;
-        var dbo = db.db("mydb");
+    dbo.collection(linkList[currentIndex].name).find({gameLocation: arenaName}).toArray(function (err, res) {
+        console.log(res);
 
-        dbo.collection(linkList[currentIndex].name).find({gameLocation: arenaName}).toArray(function (err, res) {
-            console.log(res);
-
-            if (res.length > 0) {
-                var nUpdates = 0;
-                for (var i = 0; i < res.length; i++) {
-                    (function(tmp_id){
-                        dbo.collection(arenaName).updateOne({gameID: res[tmp_id].gameID},
-                            { $set: {
-                                    series:         linkList[currentIndex].name,
-                                    played:         res[tmp_id].played,
-                                    date:           res[tmp_id].date,
-                                    homeTeamName:   res[tmp_id].homeTeamName,
-                                    awayTeamName:   res[tmp_id].awayTeamName,
-                                    homeTeamScore:  res[tmp_id].homeTeamScore,
-                                    awayTeamScore:  res[tmp_id].awayTeamScore,
-                                    gameID:         res[tmp_id].gameID,
-                                    gameLocation:   res[tmp_id].gameLocation,
-                                    gameLink:       res[tmp_id].gameLink
-                                }
-                            },
-                            {upsert: true},
-                            function(err, result) {
-                                if (err) throw err;
-                                nUpdates++;
-                                if (nUpdates === res.length) {
-                                    db.close();
-                                    console.log("finished updating " + arenaName + " from series " + linkList[currentIndex].name);
-                                    console.log("restarting");
-                                    insertGamesInSeriesIntoArenaCollection(arenaName, linkList, currentIndex+1, maxIndex, callback);
-                                }
-                            });
-                    })(i);
-                }
-            } else {
-                console.log("restarting");
-                insertGamesInSeriesIntoArenaCollection(arenaName, linkList, currentIndex+1, maxIndex, callback);
+        if (res.length > 0) {
+            var nUpdates = 0;
+            for (var i = 0; i < res.length; i++) {
+                (function(tmp_id){
+                    dbo.collection(arenaName).updateOne({gameID: res[tmp_id].gameID},
+                        { $set: {
+                                series:         linkList[currentIndex].name,
+                                played:         res[tmp_id].played,
+                                date:           res[tmp_id].date,
+                                homeTeamName:   res[tmp_id].homeTeamName,
+                                awayTeamName:   res[tmp_id].awayTeamName,
+                                homeTeamScore:  res[tmp_id].homeTeamScore,
+                                awayTeamScore:  res[tmp_id].awayTeamScore,
+                                gameID:         res[tmp_id].gameID,
+                                gameLocation:   res[tmp_id].gameLocation,
+                                gameLink:       res[tmp_id].gameLink
+                            }
+                        },
+                        {upsert: true},
+                        function(err, result) {
+                            if (err) throw err;
+                            nUpdates++;
+                            if (nUpdates === res.length) {
+                                console.log("finished updating " + arenaName + " from series " + linkList[currentIndex].name);
+                                console.log("restarting");
+                                insertGamesInSeriesIntoArenaCollection(dbo, arenaName, linkList, currentIndex+1, maxIndex, callback);
+                            }
+                        });
+                })(i);
             }
-        });
+        } else {
+            console.log("restarting");
+            insertGamesInSeriesIntoArenaCollection(dbo, arenaName, linkList, currentIndex+1, maxIndex, callback);
+        }
     });
 }
 
-function updateAllSeries2(callback) {
-    MongoClient.connect(mongourl, function(err, db) {
+function updateAllSeries2(dbo, callback) {
+    dbo.collection("links").find({}).toArray(function(err, result) {
         if (err) throw err;
-        var dbo = db.db("mydb");
-
-        dbo.collection("links").find({}).toArray(function(err, result) {
-            if (err) throw err;
-            db.close();
-            doRequestUpdateGames2(result, 0, result.length, callback);
-            
-        });
+        doRequestUpdateGames2(dbo, result, 0, result.length, callback);
     });
 }
 
-function doRequestUpdateGames2(linkList, currentIndex, maxIndex, callback) {
+function doRequestUpdateGames2(dbo, linkList, currentIndex, maxIndex, callback) {
 
     if (currentIndex === maxIndex) return callback();
     var seriesurl = linkList[currentIndex].link;
@@ -335,104 +304,90 @@ function doRequestUpdateGames2(linkList, currentIndex, maxIndex, callback) {
         else if (a.date > b.date) return 1;
         else return 0;
     });
-
-    MongoClient.connect(mongourl, function(err, db) {
-        if (err) throw err;
-        var dbo = db.db("mydb");
-
-        console.log("divisionName: " + divisionName);
-        dbo.collection(divisionName).find({}).toArray(function(err, res) {
-            //console.log(divisionName);
-            //console.log(res);
-            if (res.length === 0) {
-                //console.log("hello");
-                //we just created this collection
-            } else {
-                //collection here from before
-                //we want to get the games' places and put in gameObjects
-                for (var i = 0; i < gameObjects.length; i++) {
-                    (function(tmp_id){
-                        dbo.collection(divisionName).find({ gameID: gameObjects[tmp_id].gameID }).toArray(function(err, res) {
-                            gameObjects[tmp_id].gameLocation = res[0].gameLocation;
-                        });
-                    })(i);
-
-                }
-
-            }
-            if (res.length !== gameObjects.length) {
-                dbo.collection(divisionName).deleteMany({}, function(err, obj) {
-                    if (err) throw err;
-                    //console.log(obj.result.n + " documents deleted in " + divisionName);
-                })
-            }
-            var nUpdates = 0;
+    
+    console.log("divisionName: " + divisionName);
+    dbo.collection(divisionName).find({}).toArray(function(err, res) {
+        //console.log(divisionName);
+        //console.log(res);
+        if (res.length === 0) {
+            //console.log("hello");
+            //we just created this collection
+        } else {
+            //collection here from before
+            //we want to get the games' places and put in gameObjects
             for (var i = 0; i < gameObjects.length; i++) {
                 (function(tmp_id){
-                    dbo.collection(divisionName).updateOne({gameID: gameObjects[tmp_id].gameID},
-                        { $set: {
-                                played:         gameObjects[tmp_id].played,
-                                date:           gameObjects[tmp_id].date,
-                                homeTeamName:   gameObjects[tmp_id].homeTeamName,
-                                awayTeamName:   gameObjects[tmp_id].awayTeamName,
-                                homeTeamScore:  gameObjects[tmp_id].homeTeamScore,
-                                awayTeamScore:  gameObjects[tmp_id].awayTeamScore,
-                                gameID:         gameObjects[tmp_id].gameID,
-                                //gameLocation:   gameObjects[tmp_id].gameLocation,
-                                gameLink:       linkify(seriesurl, gameObjects[tmp_id].gameID)
-                            }
-                        },
-                        {upsert: true},
-                        function(err, res) {
-                            if (err) throw err;
-                            //console.log(res.result.nModified + " documents updated, nr " + tmp_id);
-                            nUpdates++;
-                            if (nUpdates === gameObjects.length) {
-                                //console.log("now at i = " + i + ", closing db.");
-                                db.close();
-                                console.log("finished updating " + divisionName);
-                                doRequestUpdateGames2(linkList, currentIndex+1, maxIndex, callback);
-                            }
-                        });
+                    dbo.collection(divisionName).find({ gameID: gameObjects[tmp_id].gameID }).toArray(function(err, res) {
+                        gameObjects[tmp_id].gameLocation = res[0].gameLocation;
+                    });
                 })(i);
+
             }
-        });
+
+        }
+        if (res.length !== gameObjects.length) {
+            dbo.collection(divisionName).deleteMany({}, function(err, obj) {
+                if (err) throw err;
+                //console.log(obj.result.n + " documents deleted in " + divisionName);
+            })
+        }
+        var nUpdates = 0;
+        for (var i = 0; i < gameObjects.length; i++) {
+            (function(tmp_id){
+                dbo.collection(divisionName).updateOne({gameID: gameObjects[tmp_id].gameID},
+                    { $set: {
+                            played:         gameObjects[tmp_id].played,
+                            date:           gameObjects[tmp_id].date,
+                            homeTeamName:   gameObjects[tmp_id].homeTeamName,
+                            awayTeamName:   gameObjects[tmp_id].awayTeamName,
+                            homeTeamScore:  gameObjects[tmp_id].homeTeamScore,
+                            awayTeamScore:  gameObjects[tmp_id].awayTeamScore,
+                            gameID:         gameObjects[tmp_id].gameID,
+                            //gameLocation:   gameObjects[tmp_id].gameLocation,
+                            gameLink:       linkify(seriesurl, gameObjects[tmp_id].gameID)
+                        }
+                    },
+                    {upsert: true},
+                    function(err, res) {
+                        if (err) throw err;
+                        //console.log(res.result.nModified + " documents updated, nr " + tmp_id);
+                        nUpdates++;
+                        if (nUpdates === gameObjects.length) {
+                            //console.log("now at i = " + i + ", closing db.");
+                            console.log("finished updating " + divisionName);
+                            doRequestUpdateGames2(dbo, linkList, currentIndex+1, maxIndex, callback);
+                        }
+                    });
+            })(i);
+        }
     });
 }
 
-function removeCollections(callback) {
-    MongoClient.connect(mongourl, function(err, db) {
-        if (err) throw err;
-        var dbo = db.db("mydb");
+function removeCollections(dbo, callback) {
+    dbo.collections(function (err, collections) {
+        for (var i = 0; i < collections.length; i++) {
+            if (collections.length === 1) {
+                callback();
+            } else {
+                (function(tmp_id) {
+                if(collections[tmp_id].collectionName !== "links") {
+                    dbo.collection(collections[tmp_id].collectionName).drop(function(err, delOK) {
+                        if (err) throw err;
+                        if (delOK) console.log(collections[tmp_id].collectionName + " deleted.")
 
-        dbo.collections(function (err, collections) {
-            for (var i = 0; i < collections.length; i++) {
-                if (collections.length === 1) {
-                    callback();
-                } else {
-                    (function(tmp_id) {
-                    if(collections[tmp_id].collectionName !== "links") {
-                        dbo.collection(collections[tmp_id].collectionName).drop(function(err, delOK) {
-                            if (err) throw err;
-                            if (delOK) console.log(collections[tmp_id].collectionName + " deleted.")
-
-                            if (tmp_id === collections.length-1) {
-                                console.log("removecollections callback entered!");
-                                callback();
-                            }
-                        });
-                    }
-                })(i);
+                        if (tmp_id === collections.length-1) {
+                            console.log("removecollections callback entered!");
+                            callback();
+                        }
+                    });
                 }
-            
+            })(i);
             }
-
-            console.log(collections[0].collectionName);
-        });
+        }
     });
 }
 
-function doRequestGetLinks(callback) {
+function doRequestGetLinks(dbo, callback) {
     var links = [];
     var url2 = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD9753&k=LS9753&p=1";
     request(url2, function(err, resp, html) {
@@ -534,19 +489,14 @@ function doRequestGetLinks(callback) {
                 links[j] = { link: links[j] };
             }*/
 
-            MongoClient.connect(mongourl, function(err, db) {
+            dbo.collection("links").deleteMany({}, function(err, res) {
                 if (err) throw err;
-                var dbo = db.db("mydb");
-
-                dbo.collection("links").deleteMany({}, function(err, res) {
-                    if (err) throw err;
-                    console.log("Number of documents deleted: " + res.deletedCount);
-                });
-                dbo.collection("links").insertMany(linkObjects, function(err, res) {
-                    if (err) throw err;
-                    console.log("Number of documents inserted: " + res.insertedCount);
-                    callback();
-                });
+                console.log("Number of documents deleted: " + res.deletedCount);
+            });
+            dbo.collection("links").insertMany(linkObjects, function(err, res) {
+                if (err) throw err;
+                console.log("Number of documents inserted: " + res.insertedCount);
+                callback();
             });
         }
     });
@@ -781,6 +731,7 @@ function containsDayString(str) {
 // start database refreshing at a specific time. don't let the function be called twice via runningDone variable and 30.000s timer set
 function startBackend() {
     var runningDone = false;
+    refreshDatabase();
     setInterval(function() {
         var date = new Date();
         if (date.getHours() === 2 && date.getMinutes() === 0 && !runningDone) {
@@ -801,23 +752,32 @@ function refreshDatabase() {
             - makeArena
     */
 
+   MongoClient.connect(mongourl, function(err, db) {
+    if (err) throw err;
+    var dbo = db.db("mydb");
+
     console.log("Starting database refresh...");
     console.log("Removing collections...");
-    removeCollections(function() {
+    removeCollections(dbo, function() {
         console.log("Collections removed. Updating links...");
-        doRequestGetLinks(function() {
+        doRequestGetLinks(dbo, function() {
             console.log("Links updated. Getting all series...");
-            updateAllSeries2(function() {
+            updateAllSeries2(dbo, function() {
                 console.log("All series gathered. Now getting game locations...");
-                updateAllSeriesGameLocations(function() {
+                updateAllSeriesGameLocations(dbo, function() {
                     console.log("All game locations updated... making arena...");
-                    makeArena('Skarpe Nord', function() {
+                    makeArena(dbo, 'Skarpe Nord', function() {
                         console.log("Arena-making done! Database update done!")
+                        db.close();
                     });
                 });
             });
         });
     });
+
+    });
+
+    
 }
 
 startBackend();
