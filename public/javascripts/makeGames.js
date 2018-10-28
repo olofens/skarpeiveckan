@@ -3,8 +3,8 @@ const dayArrayString = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lö
 function updateDates() {
   for (var i = 0; i < gamedata.length; i++) {
     gamedata[i].date = new Date(gamedata[i].date);
-    if (gamedata[i].date.getUTCMinutes() === 0) {
-      gamedata[i].stringTime = gamedata[i].date.getUTCHours() + ":00"; 
+    if (gamedata[i].date.getUTCMinutes() < 10) {
+      gamedata[i].stringTime = gamedata[i].date.getUTCHours() + ":0" + gamedata[i].date.getUTCMinutes(); 
     } else {
       gamedata[i].stringTime = gamedata[i].date.getUTCHours() + ":" + gamedata[i].date.getUTCMinutes();
     }
