@@ -154,16 +154,16 @@ function GameTable(props) {
       <table class="game">
         <tbody>
           <tr>
-            <td class="series">{props.series}</td>
-            <td><img src="https://imgur.com/S1wlTMy.jpg" height="50" width="50"></img></td>
-            <td>{props.time}</td>
-            <td><img src="https://imgur.com/S1wlTMy.jpg" height="50" width="50"></img></td>
+            <td width="25%" class="series">{props.series}</td>
+            <td width="25%"><img src="https://imgur.com/S1wlTMy.jpg" height="50" width="50"></img></td>
+            <td width="25%">{props.time}</td>
+            <td width="25%"><img src="https://imgur.com/S1wlTMy.jpg" height="50" width="50"></img></td>
           </tr>
           <tr>
-            <td></td>
-            <td class="teamname">{props.homeTeamName}</td>
-            <td class="centerdash">-</td>
-            <td class="teamname">{props.awayTeamName}</td>
+            <td width="25%"></td>
+            <td width="25%" class="teamname">{props.homeTeamName}</td>
+            <td width="25%" class="centerdash">-</td>
+            <td width="25%" class="teamname">{props.awayTeamName}</td>
           </tr>
         </tbody>
       </table>
