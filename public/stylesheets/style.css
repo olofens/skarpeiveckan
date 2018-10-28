@@ -3,15 +3,20 @@ body {
   font: 18px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
+#weekText {
+  font-size: 24px;
+  text-align: center;
+}
+
 a {
   color: #00B7FF;
 }
 
 i {
   border: solid black;
-  border-width: 0 3px 3px 0;
+  border-width: 0 5px 5px 0;
   display: inline-block;
-  padding: 3px;
+  padding: 5px;
 }
 
 .right {
