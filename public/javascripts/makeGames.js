@@ -3,6 +3,11 @@ const dayArrayString = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lö
 function updateDates() {
   for (var i = 0; i < gamedata.length; i++) {
     gamedata[i].date = new Date(gamedata[i].date);
+    if (gamedata[i].date.getUTCMinutes() === 0) {
+      gamedata[i].stringTime = gamedata[i].date.getUTCHours() + ":00"; 
+    } else {
+      gamedata[i].stringTime = gamedata[i].date.getUTCHours() + ":" + gamedata[i].date.getUTCMinutes();
+    }
   }
   gamedata.sort(function(a,b) {
     if (a.date < b.date) return -1;
@@ -82,7 +87,8 @@ function changeShowedGames(newWeek) {
         <li key={gameobject.gameID.toString()}>
           <GameTable homeTeamName = {gameobject.homeTeamName}
                     awayTeamName = {gameobject.awayTeamName}
-                    time = {gameobject.date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    //time = {gameobject.date.getUTCHours() + ":" + gameobject.date.getUTCMinutes()}
+                    time = {gameobject.stringTime}
                     props = {gameobject.gameID.toString()} />
         </li>
     );
