@@ -93,6 +93,11 @@ function changeShowedGames(newWeek) {
         </li>
     );
     ReactDOM.render(<ul class="gameul">{listItemsDynamic}</ul>, document.querySelector("#" + dayArrayString[i].toString() + "Games"));
+    
+    // set Header texts (ex Lördag, 24/11)
+
+    ReactDOM.render(<p>{dayArrayString[i].toString() + ", " + listOfGames[i][0].date.getUTCDate() + "/" + (listOfGames[i][0].date.getUTCMonth()+1)}</p>,
+     document.querySelector("#" + dayArrayString[i].toString() + "Text"));
     } else {
       document.getElementById(dayArrayString[i].toString() + "Top").style.display = "none";
     }
