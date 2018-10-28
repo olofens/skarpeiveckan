@@ -87,8 +87,9 @@ function changeShowedGames(newWeek) {
         <li key={gameobject.gameID.toString()}>
           <GameTable homeTeamName = {gameobject.homeTeamName}
                     awayTeamName = {gameobject.awayTeamName}
+                    series = {gameobject.series}
                     //time = {gameobject.date.getUTCHours() + ":" + gameobject.date.getUTCMinutes()}
-                    time = {gameobject.stringTime}
+                    time = {"Matchstart " + gameobject.stringTime}
                     props = {gameobject.gameID.toString()} />
         </li>
     );
@@ -153,11 +154,13 @@ function GameTable(props) {
       <table class="game">
         <tbody>
           <tr>
+            <td class="series">{props.series}</td>
             <td><img src="https://imgur.com/S1wlTMy.jpg" height="50" width="50"></img></td>
             <td>{props.time}</td>
             <td><img src="https://imgur.com/S1wlTMy.jpg" height="50" width="50"></img></td>
           </tr>
           <tr>
+            <td></td>
             <td class="teamname">{props.homeTeamName}</td>
             <td class="centerdash">-</td>
             <td class="teamname">{props.awayTeamName}</td>
