@@ -9,12 +9,12 @@ a {
 
 .game {
   padding: 20px;
-  background: #d3d3d3;
   list-style-type: none;
   margin: 0 0 5px 0;
   text-align: center;
   position: relative;
   width: 100%;
+  border-bottom: 1px solid gray;
 
 }
 
