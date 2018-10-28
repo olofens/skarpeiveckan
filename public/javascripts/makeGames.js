@@ -171,8 +171,8 @@ function GameTable(props) {
 }
 
 changeShowedGames(getCurrentWeek());
-const buttonNext = <button onClick={nextButtonClicked}> Nästa </button>
-const buttonPrev = <button onClick={prevButtonClicked}> Förra </button>
+const buttonNext = <button className="prevnextbutton" onClick={nextButtonClicked}><i class = "arrow right"></i></button>
+const buttonPrev = <button className="prevnextbutton" onClick={prevButtonClicked}><i class = "arrow left"></i></button>
 
 ReactDOM.render(buttonNext, document.querySelector("#buttonNext"));
 ReactDOM.render(buttonPrev, document.querySelector("#buttonPrev"));
