@@ -119,11 +119,17 @@ function setThisWeeksGameData(week) {
 
 function nextButtonClicked() {
   selectedWeek++;
+  if (selectedWeek === 53) {
+    selectedWeek = 1;
+  }
   changeShowedGames(selectedWeek);
 }
 
 function prevButtonClicked() {
   selectedWeek--;
+  if (selectedWeek === 0) {
+    selectedWeek = 52;
+  }
   changeShowedGames(selectedWeek);
 }
 
