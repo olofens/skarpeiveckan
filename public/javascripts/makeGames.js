@@ -1,6 +1,14 @@
 const dayArrayString = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag", "Söndag"];
 const teamLogoList = [
-  {name: "Kungälvs SK", imglink: "https://imgur.com/S1wlTMy.jpg"}];
+  // link to imgur album: https://imgur.com/a/dMITeRW
+  {name: "Kungälvs SK", imglink: "https://imgur.com/8oP89Cn.jpg"},
+  {name: "IFK Kungälv", imglink: "https://imgur.com/8mdIpWo.jpg"},
+  {name: "Kareby IS", imglink: "https://imgur.com/R5QLfXs.jpg"},
+  {name: "Kareby Kungälv", imglink: "https://imgur.com/R5QLfXs.jpg"},
+  {name: "Kareby IS P11", imglink: "https://imgur.com/R5QLfXs.jpg"},
+  {name: "Surte/Kareby", imglink: "https://imgur.com/fFbH42j.jpg"},
+  {name: "Surte BK", imglink: "https://imgur.com/0mAzt9i.jpg"},
+  {name: "Vildkatterna", imglink: "https://imgur.com/0mAzt9i.jpg"}];
 
 function updateDates() {
   for (var i = 0; i < gamedata.length; i++) {
@@ -166,9 +174,9 @@ function GameTable(props) {
         <tbody>
           <tr>
             <td width="25%" className="series">{props.series}</td>
-            <td width="25%"><img src={props.homeimg} height="50" width="50"></img></td>
+            <td width="25%"><img src={props.homeimg} height="50"></img></td>
             <td width="25%">{props.time}</td>
-            <td width="25%"><img src={props.awayimg} height="50" width="50"></img></td>
+            <td width="25%"><img src={props.awayimg} height="50"></img></td>
           </tr>
           <tr>
             <td width="25%"></td>
