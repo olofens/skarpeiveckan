@@ -8,7 +8,18 @@ const teamLogoList = [
   {name: "Kareby IS P11", imglink: "https://imgur.com/R5QLfXs.jpg"},
   {name: "Surte/Kareby", imglink: "https://imgur.com/fFbH42j.jpg"},
   {name: "Surte BK", imglink: "https://imgur.com/0mAzt9i.jpg"},
-  {name: "Vildkatterna", imglink: "https://imgur.com/0mAzt9i.jpg"}];
+  {name: "Vildkatterna", imglink: "https://imgur.com/0mAzt9i.jpg"},
+  {name: "Lidköpings AIK", imglink: "https://imgur.com/nuNuxcX.jpg"},
+  {name: "Oskarströms BK", imglink: "https://imgur.com/cVemerO.jpg"},
+  {name: "Otterbäckens BK", imglink: "https://imgur.com/5SHsDgp.jpg"},
+  {name: "BK Slottshov", imglink: "https://imgur.com/mZGLcQq.jpg"},
+  {name: "Sunvära SK", imglink: "https://imgur.com/TX5pxdR.jpg"},
+  {name: "Västanfors IF", imglink: "https://imgur.com/fWRNBaZ.jpg"},
+  {name: "Frillesås/Sunvära", imglink: "https://imgur.com/gzbgQTc.jpg"},
+  {name: "Ljusdals BK", imglink: "https://imgur.com/PYiV02f.jpg"},
+  {name: "Villa Lidköping BK (blå)", imglink: "https://imgur.com/DY5fg8R.jpg"},
+  {name: "Villa Lidköping BK", imglink: "https://imgur.com/DY5fg8R.jpg"},
+  {name: "Vadsjön BK", imglink: "https://imgur.com/xvAB2Oi.jpg"}];
 
 function updateDates() {
   for (var i = 0; i < gamedata.length; i++) {
