@@ -97,7 +97,7 @@ function changeShowedGames(newWeek) {
     
     // set Header texts (ex Lördag, 24/11)
 
-    ReactDOM.render(<p>{dayArrayString[i].toString() + ", " + listOfGames[i][0].date.getUTCDate() + "/" + (listOfGames[i][0].date.getUTCMonth()+1)}</p>,
+    ReactDOM.render(<p class="gameday">{dayArrayString[i].toString() + ", " + listOfGames[i][0].date.getUTCDate() + "/" + (listOfGames[i][0].date.getUTCMonth()+1)}</p>,
      document.querySelector("#" + dayArrayString[i].toString() + "Text"));
     } else {
       document.getElementById(dayArrayString[i].toString() + "Top").style.display = "none";
@@ -154,16 +154,16 @@ function GameTable(props) {
       <table class="game">
         <tbody>
           <tr>
-            <td width="25%" class="series">{props.series}</td>
+            <td width="25%" className="series">{props.series}</td>
             <td width="25%"><img src="https://imgur.com/S1wlTMy.jpg" height="50" width="50"></img></td>
             <td width="25%">{props.time}</td>
             <td width="25%"><img src="https://imgur.com/S1wlTMy.jpg" height="50" width="50"></img></td>
           </tr>
           <tr>
             <td width="25%"></td>
-            <td width="25%" class="teamname">{props.homeTeamName}</td>
-            <td width="25%" class="centerdash">-</td>
-            <td width="25%" class="teamname">{props.awayTeamName}</td>
+            <td width="25%" className="teamname">{props.homeTeamName}</td>
+            <td width="25%" className="centerdash">-</td>
+            <td width="25%" className="teamname">{props.awayTeamName}</td>
           </tr>
         </tbody>
       </table>
@@ -171,8 +171,9 @@ function GameTable(props) {
 }
 
 changeShowedGames(getCurrentWeek());
-const buttonNext = <button className="prevnextbutton" onClick={nextButtonClicked}><i class = "arrow right"></i></button>
-const buttonPrev = <button className="prevnextbutton" onClick={prevButtonClicked}><i class = "arrow left"></i></button>
+const buttonNext = <button className="prevnextbutton" onClick={nextButtonClicked}><i class="arrow right"></i></button>
+const buttonPrev = <button className="prevnextbutton" onClick={prevButtonClicked}><i class="arrow left"></i></button>
+
 
 ReactDOM.render(buttonNext, document.querySelector("#buttonNext"));
 ReactDOM.render(buttonPrev, document.querySelector("#buttonPrev"));
