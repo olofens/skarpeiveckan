@@ -1,4 +1,6 @@
 const dayArrayString = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag", "Söndag"];
+const teamLogoList = [
+  {name: "Kungälvs SK", imglink: "https://imgur.com/S1wlTMy.jpg"}];
 
 function updateDates() {
   for (var i = 0; i < gamedata.length; i++) {
@@ -18,6 +20,14 @@ function updateDates() {
   console.log(gamedata);
 }
 updateDates();
+
+function getImgLink(teamName) {
+  for (var i = 0; i < teamLogoList.length; i++) {
+    if (teamName === teamLogoList[i].name) {
+      return teamLogoList[i].imglink;
+    }
+  }
+}
 
 function objectifyWeekGames(weekGames) {
   var listOfGames = [];
@@ -88,8 +98,9 @@ function changeShowedGames(newWeek) {
           <GameTable homeTeamName = {gameobject.homeTeamName}
                     awayTeamName = {gameobject.awayTeamName}
                     series = {gameobject.series}
-                    //time = {gameobject.date.getUTCHours() + ":" + gameobject.date.getUTCMinutes()}
                     time = {"Matchstart " + gameobject.stringTime}
+                    homeimg = {getImgLink(gameobject.homeTeamName)}
+                    awayimg = {getImgLink(gameobject.awayTeamName)}
                     props = {gameobject.gameID.toString()} />
         </li>
     );
@@ -155,9 +166,9 @@ function GameTable(props) {
         <tbody>
           <tr>
             <td width="25%" className="series">{props.series}</td>
-            <td width="25%"><img src="https://imgur.com/S1wlTMy.jpg" height="50" width="50"></img></td>
+            <td width="25%"><img src={props.homeimg} height="50" width="50"></img></td>
             <td width="25%">{props.time}</td>
-            <td width="25%"><img src="https://imgur.com/S1wlTMy.jpg" height="50" width="50"></img></td>
+            <td width="25%"><img src={props.awayimg} height="50" width="50"></img></td>
           </tr>
           <tr>
             <td width="25%"></td>
