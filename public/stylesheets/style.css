@@ -5,7 +5,10 @@ body {
 
 #weekText {
   font-size: 24px;
-  text-align: center;
+  width: 34%;
+  margin-left: auto;
+  margin-right: auto;
+  text-align:center;
 }
 
 a {
@@ -41,8 +44,8 @@ i {
 }
 
 .prevnextbutton {
-  margin-left: 10px;
-  margin-right: 10px;
+  display: block;
+  margin: auto;
   border-radius: 50%;
   background-color: transparent;
   color: black;
@@ -50,7 +53,6 @@ i {
   padding: 16px 20px;
   text-align: center;
   text-decoration: none;
-  display: inline-block;
   font-size: 16 px;
   transition: background-color .3s;
 
@@ -102,4 +104,14 @@ button:focus {
 .date{
   width: 10%;
 
+}
+
+#buttonPrev {
+  align-self: center;
+  width: 33%;
+}
+
+#buttonNext {
+  align-self: center;
+  width: 33%;
 }

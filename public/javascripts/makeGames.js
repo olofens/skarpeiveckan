@@ -103,7 +103,7 @@ function changeShowedGames(newWeek) {
       document.getElementById(dayArrayString[i].toString() + "Top").style.display = "none";
     }
   }
-  ReactDOM.render(<p width="34%">vecka {newWeek}</p>, document.querySelector("#weekText"));
+  ReactDOM.render(<p>Vecka {newWeek}</p>, document.querySelector("#weekText"));
 }
 
 var thisWeeksGameData = [];
@@ -171,8 +171,8 @@ function GameTable(props) {
 }
 
 changeShowedGames(getCurrentWeek());
-const buttonNext = <button width="33%" className="prevnextbutton" onClick={nextButtonClicked}><i class = "arrow right"></i></button>
-const buttonPrev = <button width="33%" className="prevnextbutton" onClick={prevButtonClicked}><i class = "arrow left"></i></button>
+const buttonNext = <button className="prevnextbutton" onClick={nextButtonClicked}><i class = "arrow right"></i></button>
+const buttonPrev = <button className="prevnextbutton" onClick={prevButtonClicked}><i class = "arrow left"></i></button>
 
 ReactDOM.render(buttonNext, document.querySelector("#buttonNext"));
 ReactDOM.render(buttonPrev, document.querySelector("#buttonPrev"));
