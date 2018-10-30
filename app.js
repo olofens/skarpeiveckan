@@ -734,7 +734,7 @@ function startBackend() {
     refreshDatabase();
     setInterval(function() {
         var date = new Date();
-        if (date.getHours() === 2 && date.getMinutes() === 0 && !runningDone) {
+        if (date.getHours() === 3 && date.getMinutes() === 0 && !runningDone) {
             refreshDatabase();
             runningDone = true;
         } else {
