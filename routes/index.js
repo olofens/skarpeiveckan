@@ -12,7 +12,7 @@ router.get('/', function(req, res, next) {
     var nowDate = new Date();
 
     dbo = db.db("mydb");
-    var cursor = dbo.collection("Skarpe Nord").find();
+    var cursor = dbo.collection("Ale Arena Surte").find();
     cursor.forEach(function(doc, err) {
       if (err) throw err;
       //console.log("hello");

@@ -731,6 +731,7 @@ function containsDayString(str) {
 // start database refreshing at a specific time. don't let the function be called twice via runningDone variable and 30.000s timer set
 function startBackend() {
     var runningDone = false;
+    refreshDatabase();
     setInterval(function() {
         var date = new Date();
         if (date.getHours() === 2 && date.getMinutes() === 0 && !runningDone) {
@@ -755,23 +756,9 @@ function refreshDatabase() {
     if (err) throw err;
     var dbo = db.db("mydb");
 
-    console.log("Starting database refresh...");
-    console.log("Removing collections...");
-    removeCollections(dbo, function() {
-        console.log("Collections removed. Updating links...");
-        doRequestGetLinks(dbo, function() {
-            console.log("Links updated. Getting all series...");
-            updateAllSeries2(dbo, function() {
-                console.log("All series gathered. Now getting game locations...");
-                updateAllSeriesGameLocations(dbo, function() {
-                    console.log("All game locations updated... making arena...");
-                    makeArena(dbo, 'Skarpe Nord', function() {
-                        console.log("Arena-making done! Database update done!")
-                        db.close();
-                    });
-                });
-            });
-        });
+    makeArena(dbo, 'Ale Arena Surte', function() {
+        console.log("Arena-making done! Database update done!")
+        db.close();
     });
 
     });
@@ -784,7 +771,7 @@ startBackend();
 // ping myself every 5 minutes to make sure website doesnt sleep (heroku)
 var http = require("http");
 setInterval(function() {
-    http.get("http://skarpetest.herokuapp.com");
+    http.get("http://aletest.herokuapp.com");
 }, 300000); // every 5 minutes (300000)
 
 var kskurl = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD7931&k=LS7931&p=1";
