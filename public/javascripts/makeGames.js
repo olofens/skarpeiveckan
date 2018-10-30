@@ -60,7 +60,16 @@ function updateDates() {
     } else {
       gamedata[i].stringTime = gamedata[i].date.getUTCHours() + ":" + gamedata[i].date.getUTCMinutes();
     }
+
+    // also update scores here... lul
+    if (gamedata[i].homeTeamScore === "-") {
+      gamedata[i].homeTeamScore = 0;
+      gamedata[i].awayTeamScore = 0;
+    }
   }
+
+  
+
   gamedata.sort(function(a,b) {
     if (a.date < b.date) return -1;
     else if (a.date > b.date) return 1;
@@ -146,6 +155,7 @@ function changeShowedGames(newWeek) {
       listItemsDynamic = listOfGames[i].map((gameobject) =>
         <li key={gameobject.gameID.toString()}>
           <GameTable homeTeamName = {gameobject.homeTeamName}
+                    dashText = {gameobject.homeTeamScore + "   -   " + gameobject.awayTeamScore}
                     awayTeamName = {gameobject.awayTeamName}
                     series = {gameobject.series}
                     time = {"Matchstart " + gameobject.stringTime}
@@ -223,7 +233,7 @@ function GameTable(props) {
           <tr>
             <td width="25%"></td>
             <td width="25%" className="teamname">{props.homeTeamName}</td>
-            <td width="25%" className="centerdash">-</td>
+            <td width="25%" className="centerdash">{props.dashText}</td>
             <td width="25%" className="teamname">{props.awayTeamName}</td>
           </tr>
         </tbody>
