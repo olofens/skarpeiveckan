@@ -19,7 +19,7 @@ router.get('/', function(req, res, next) {
       resultArray.push(doc);
     }, function() {
       db.close();
-      res.render('index', {title: "Skarpe Nord", gamesjson: JSON.stringify(resultArray), games: resultArray});
+      res.render('index', {title: "Ale Arena", gamesjson: JSON.stringify(resultArray), games: resultArray});
       // below for pure html
       //res.send("index");
     });
