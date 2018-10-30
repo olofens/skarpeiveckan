@@ -14,16 +14,19 @@ const teamLogoList = [
   {name: "LAIK", imglink: "https://imgur.com/nuNuxcX.jpg"},
   {name: "LAIK U", imglink: "https://imgur.com/nuNuxcX.jpg"},
   {name: "Oskarströms BK", imglink: "https://imgur.com/cVemerO.jpg"},
+  {name: "Oskarström/SBK", imglink: "https://imgur.com/cVemerO.jpg"},
   {name: "Otterbäckens BK", imglink: "https://imgur.com/5SHsDgp.jpg"},
   {name: "Otterbäcken/Hajstorp", imglink: "https://imgur.com/5SHsDgp.jpg"},
   {name: "BK Slottshov", imglink: "https://imgur.com/mZGLcQq.jpg"},
   {name: "Sunvära SK", imglink: "https://imgur.com/TX5pxdR.jpg"},
   {name: "Västanfors IF", imglink: "https://imgur.com/fWRNBaZ.jpg"},
   {name: "Frillesås/Sunvära", imglink: "https://imgur.com/gzbgQTc.jpg"},
+  {name: "Sunvära/Frillesås", imglink: "https://imgur.com/gzbgQTc.jpg"},
   {name: "Ljusdals BK", imglink: "https://imgur.com/PYiV02f.jpg"},
   {name: "Villa Lidköping BK (blå)", imglink: "https://imgur.com/DY5fg8R.jpg"},
   {name: "Villa Lidköping BK (vit)", imglink: "https://imgur.com/DY5fg8R.jpg"},
   {name: "Villa Lidköping BK", imglink: "https://imgur.com/DY5fg8R.jpg"},
+  {name: "Villa Lidköping BK U", imglink: "https://imgur.com/DY5fg8R.jpg"},
   {name: "Villa Flick", imglink: "https://imgur.com/DY5fg8R.jpg"},
   {name: "Villa LBK (blå)", imglink: "https://imgur.com/DY5fg8R.jpg"},
   {name: "Vadsjön BK", imglink: "https://imgur.com/xvAB2Oi.jpg"},
@@ -56,7 +59,9 @@ const teamLogoList = [
   // second imgur album: https://imgur.com/a/WGQztFK
   {name: "Västerstrands AIK", imglink: "https://imgur.com/foMDGlW.jpg"},
   {name: "Västerås SK", imglink: "https://imgur.com/zMRI4oV.jpg"},
-  {name: "Västerås SK U", imglink: "https://imgur.com/zMRI4oV.jpg"}];
+  {name: "Västerås SK U", imglink: "https://imgur.com/zMRI4oV.jpg"},
+  {name: "Skirö AIK", imglink: "https://imgur.com/IF9YdhV.jpg"},
+  {name: "IFK Motala", imglink: "https://imgur.com/WRmB4qI.jpg"}];
 
 function updateDates() {
   for (var i = 0; i < gamedata.length; i++) {
