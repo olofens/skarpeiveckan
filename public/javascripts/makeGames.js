@@ -147,10 +147,11 @@ function changeShowedGames(newWeek) {
     }
   }
 
+  var anyGames = false;
   for (var i = 0; i < listOfGames.length; i++) {
     document.getElementById(dayArrayString[i].toString() + "Top").style.display = "";
     if (listOfGames[i] !== undefined) {
-
+      anyGames = true;
       var listItemsDynamic = [];
       listItemsDynamic = listOfGames[i].map((gameobject) =>
         <li key={gameobject.gameID.toString()}>
@@ -174,6 +175,13 @@ function changeShowedGames(newWeek) {
       document.getElementById(dayArrayString[i].toString() + "Top").style.display = "none";
     }
   }
+
+  if (!anyGames) {
+    ReactDOM.render(<p className="nogames">Inga matcher denna veckan</p>, document.querySelector("#gamearea"));
+  } else {
+    ReactDOM.render(<p className="nogames"> </p>, document.querySelector("#gamearea"));
+  }
+  
   ReactDOM.render(<p>Vecka {newWeek}</p>, document.querySelector("#weekText"));
 }
 
