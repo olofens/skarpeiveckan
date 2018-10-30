@@ -10,6 +10,7 @@ var MongoClient = require("mongodb").MongoClient;
 var assert = require("assert");
 var sem = require("semaphore")(20);
 var syncrequest = require("sync-request");
+var favicon = require("serve-favicon");
 
 
 var indexRouter = require('./routes/index');
@@ -30,7 +31,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
-
+app.use(favicon(__dirname + "/public/favicon.ico"));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
