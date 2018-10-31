@@ -162,6 +162,7 @@ function changeShowedGames(newWeek) {
                     time = {"Matchstart " + gameobject.stringTime}
                     homeimg = {getImgLink(gameobject.homeTeamName)}
                     awayimg = {getImgLink(gameobject.awayTeamName)}
+                    url = {gameobject.gameLink}
                     props = {gameobject.gameID.toString()} />
         </li>
     );
@@ -233,7 +234,7 @@ function GameTable(props) {
       <table class="game">
         <tbody>
           <tr>
-            <td width="25%" className="series">{props.series}</td>
+            <td width="25%" className="series"><a href={props.url}>{props.series}</a></td>
             <td width="25%"><img src={props.homeimg} height="50"></img></td>
             <td width="25%">{props.time}</td>
             <td width="25%"><img src={props.awayimg} height="50"></img></td>
