@@ -261,7 +261,7 @@ function doRequestUpdateGames2(dbo, linkList, currentIndex, maxIndex, callback) 
         divisionName = $(this).text();
     });
 
-    if (divisoinName !== undefined) {
+    if (divisionName !== undefined) {
         var oddRows = [];
     var evenRows = [];
     var gameRows = [];
