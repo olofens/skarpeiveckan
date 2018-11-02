@@ -457,11 +457,9 @@ function doRequestGetLinks(dbo, callback) {
 
             for (var i = 0; i < linkObjects.length; i++) {
                 if (linkObjects[i].link.includes("X")) {
-                    console.log("contains x, stop!!");
-                    console.log(linkObjects[i]);
-                    while(true){
-
-                    }
+                    linkObjects[i].link = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD" 
+                        + linkObjects.link + "&k=LS"
+                        + linkObjects[i].link.slice(0, linkObjects[i].link.length - 2) + "&p=1";
                 } else {
                     linkObjects[i].link = "https://www.profixio.com/fx/serieoppsett.php?t=SBF_SERIE_AVD"
                         + linkObjects[i].link + "&k=LS"
