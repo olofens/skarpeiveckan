@@ -261,8 +261,12 @@ function doRequestUpdateGames2(dbo, linkList, currentIndex, maxIndex, callback) 
         divisionName = $(this).text();
     });
 
-    if (divisionName !== undefined) {
-        var oddRows = [];
+    if (divisionName === "" || divisionName === undefined) {
+        doRequestUpdateGames2(dbo, linkList, currentIndex+1, maxIndex, callback);
+    }
+
+    
+    var oddRows = [];
     var evenRows = [];
     var gameRows = [];
 
@@ -363,9 +367,6 @@ function doRequestUpdateGames2(dbo, linkList, currentIndex, maxIndex, callback) 
             })(i);
         }
     });
-    }
-
-    
 }
 
 function removeCollections(dbo, callback) {
