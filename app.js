@@ -423,7 +423,7 @@ function doRequestGetLinks(dbo, callback) {
                     console.log(linkHtmlName);
                 }
 
-                if (linkHtmlLink.includes("SBF_SERIE_AVD")) {
+                if (linkHtmlLink.includes("SBF_SERIE_AVD") && !linkHtmlLink.includes("X")) {
                     linkObjects.push({
                         name: linkHtmlName,
                         link: linkHtmlLink.slice(32, linkHtmlLink.indexOf("&"))
@@ -450,7 +450,7 @@ function doRequestGetLinks(dbo, callback) {
                     console.log(linkHtmlName);
                 }
 
-                if (linkHtmlLink.includes("SBF_SERIE_AVD")) {
+                if (linkHtmlLink.includes("SBF_SERIE_AVD")  && !linkHtmlLink.includes("X")) {
                     linkObjects.push({
                         name: linkHtmlName,
                         link: linkHtmlLink.slice(50, linkHtmlLink.indexOf("&"))
