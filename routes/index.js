@@ -6,6 +6,10 @@ var mongourl = "mongodb+srv://user1:pass1234PASS@cluster0-zdx0o.mongodb.net/test
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
+  res.render("startindex");
+});
+
+router.get("/skarpenord", function(req, res, next) {
   var resultArray = [];
   MongoClient.connect(mongourl, function(err, db) {
     if (err) throw err;
