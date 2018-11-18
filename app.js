@@ -582,9 +582,9 @@ function objectify(row, gameID, gameLocation) {
         // this needs a better system. when the season starts games after june are this year
         // until after december... need to figure something out here
         if (Number(stringMonth) > 6) {
-            gameYear = dateNow.getFullYear()-1;
-        } else {
             gameYear = dateNow.getFullYear();
+        } else {
+            gameYear = dateNow.getFullYear()+1;
         }
 
         var date = new Date(gameYear, Number(stringMonth)-1, Number(stringDay),
