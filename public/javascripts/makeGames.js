@@ -86,6 +86,8 @@ function getImgLink(teamName) {
       return teamLogoList[i].imglink;
     }
   }
+  // if no logo found return unknown img
+  return "https://imgur.com/mFnWJMe.jpg";
 }
 
 function objectifyWeekGames(weekGames) {
