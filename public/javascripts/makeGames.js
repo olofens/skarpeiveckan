@@ -94,6 +94,8 @@ function getImgLink(teamName) {
       return teamLogoList[i].imglink;
     }
   }
+  // if we didnt find the team logo show unknown
+  return "https://imgur.com/mFnWJMe.jpg";
 }
 
 function objectifyWeekGames(weekGames) {
