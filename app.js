@@ -186,6 +186,38 @@ function makeArena(dbo, arenaName, callback) {
     });
 }
 
+function mergeArenas(dbo, finalArena, arenasToInsert, callback) {
+    for (var i = 0; i < arenasToInsert.length; i++) {
+        (function(tmp_id_2) {
+            dbo.collection(arenasToInsert[tmp_id_2]).find({gameLocation: arenasToInsert[tmp_id_2]}).toArray(function(err, res) {
+                console.log(res);
+                var seriesName = res[0].series;
+                console.log("seriesName: " + seriesName);
+                for (var j = 0; j < res.length; j++) {
+                    (function(tmp_id){
+                        dbo.collection(finalArena).updateOne({gameID: res[tmp_id].gameID},
+                            { $set: {
+                                    series:         seriesName,
+                                    played:         res[tmp_id].played,
+                                    date:           res[tmp_id].date,
+                                    homeTeamName:   res[tmp_id].homeTeamName,
+                                    awayTeamName:   res[tmp_id].awayTeamName,
+                                    homeTeamScore:  res[tmp_id].homeTeamScore,
+                                    awayTeamScore:  res[tmp_id].awayTeamScore,
+                                    gameID:         res[tmp_id].gameID,
+                                    gameLocation:   finalArena,
+                                    gameLink:       res[tmp_id].gameLink
+                                }
+                            },
+                        {upsert: true})
+                    })(j);
+                }
+            });
+        })(i);
+    }
+    callback();
+}
+
 function insertGamesInSeriesIntoArenaCollection(dbo, arenaName, linkList, currentIndex, maxIndex, callback) {
     if (currentIndex === maxIndex) return callback();
     console.log("Looking in series: " + linkList[currentIndex].name);
@@ -747,6 +779,9 @@ function startBackend() {
             });
         });
     */
+   //Optional make Skarpe arenas upon startup 
+   // DOES NOT WORK, W.I.P.
+    //makeSkarpe();
     setInterval(function() {
         var date = new Date();
         if (date.getHours() === 2 && date.getMinutes() === 0 && !runningDone) {
@@ -767,7 +802,7 @@ function refreshDatabase() {
             - makeArena
     */
 
-   MongoClient.connect(mongourl, function(err, db) {
+    MongoClient.connect(mongourl, function(err, db) {
     if (err) throw err;
     var dbo = db.db("mydb");
 
@@ -782,17 +817,35 @@ function refreshDatabase() {
                 updateAllSeriesGameLocations(dbo, function() {
                     console.log("All game locations updated... making arena...");
                     makeArena(dbo, 'Skarpe Nord', function() {
-                        console.log("Arena-making done! Database update done!")
-                        db.close();
+                        console.log("Skarpe Nord done");
+                        makeArena(dbo, 'Skarpe Nord, Kungälv', function() {
+                            console.log("Arena-making done! Database update done!")
+                            db.close();
+                        });
                     });
                 });
             });
         });
     });
+    }); 
+}
 
+function makeSkarpe() {
+    MongoClient.connect(mongourl, function(err, db) {
+        if (err) throw err;
+        var dbo = db.db("mydb");
+        makeArena(dbo, 'Skarpe Nord', function() {
+            console.log("Skarpe Nord done");
+            makeArena(dbo, 'Skarpe Nord, Kungälv', function() {
+                console.log("Arena-making done! Database update done!")
+                console.log("merging...");
+                mergeArenas(dbo, "Skarpe Nord", ["Skarpe Nord, Kungälv"], function() {
+                    console.log("Merging done, closing db...");
+                    db.close();
+                });
+            });
+        });
     });
-
-    
 }
 
 startBackend();

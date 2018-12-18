@@ -18,10 +18,14 @@ router.get('/', function(req, res, next) {
       //console.log("hello");
       resultArray.push(doc);
     }, function() {
-      db.close();
+      var cursor2 = dbo.collection("Skarpe Nord, Kungälv").find();
+      cursor2.forEach(function(doc, err) {
+        if (err) throw err;
+        resultArray.push(doc);
+      }, function() {
+        db.close();
       res.render('index', {title: "Skarpe Nord", gamesjson: JSON.stringify(resultArray), games: resultArray});
-      // below for pure html
-      //res.send("index");
+      });
     });
   });
 });
