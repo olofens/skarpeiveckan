@@ -768,7 +768,7 @@ function containsDayString(str) {
 function startBackend() {
     var runningDone = false;
     // optionally refresh database upon startup
-    //refreshDatabase();
+    refreshDatabase();
     /* Optional makeArena on startup, for simplicity...
     MongoClient.connect(mongourl, function(err, db) {
         if (err) throw err;
