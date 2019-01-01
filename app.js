@@ -638,9 +638,9 @@ function objectify(row, gameID, gameLocation) {
             var dateNow = new Date();
 
             if (Number(stringMonth) > 6) {
-                gameYear = dateNow.getFullYear();
+                gameYear = dateNow.getFullYear()-1;
             } else {
-                gameYear = dateNow.getFullYear()+1;
+                gameYear = dateNow.getFullYear();
             }
 
             var date = new Date(gameYear, Number(stringMonth)-1, Number(stringDay),
@@ -696,9 +696,9 @@ function objectify(row, gameID, gameLocation) {
             var dateNow = new Date();
 
             if (Number(stringMonth) > 6) {
-                gameYear = dateNow.getFullYear();
+                gameYear = dateNow.getFullYear()-1;
             } else {
-                gameYear = dateNow.getFullYear()+1;
+                gameYear = dateNow.getFullYear();
             }
 
             var date = new Date(gameYear, Number(stringMonth)-1, Number(stringDay),
